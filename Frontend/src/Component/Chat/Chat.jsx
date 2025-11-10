@@ -45,11 +45,24 @@ function Chat() {
   }, [currentUser]);
 
   useEffect(() => {
+  const handler = setTimeout(() => {
+    if (searchName.trim() === "") {
+      setSearchResults(users);
+    } else {
+      const lower = searchName.toLowerCase();
+      const match = users.filter(u => 
+        u.name.toLowerCase().includes(lower)   
+      );
+      setSearchResults(match);
+    }
+  }, 300); 
+  return () => clearTimeout(handler);
+}, [searchName, users]);
+
+
+  useEffect(() => {
     socket.on("receive_message", (data) => {
       setMessages((prev) => [...prev, data]);
-      if (!selectedUser) {
-        setSelectedUser(data.sender);
-      }
     });
 
     return () => socket.off("receive_message");
@@ -70,29 +83,6 @@ function Chat() {
     setMessages((prev) => [...prev, msgData]);
     setMessage("");
   };
-
-  useEffect(() => {
-    const delay = setTimeout(async () => {
-      if (!searchName.trim()) {
-        setSearchResults([]);
-        return;
-      }
-      try {
-        const res = await fetch(`${base_url}/search?name=${searchName}&currentUser=${currentUser}`);
-        const data = await res.json();
-        if (res.ok) {
-          setSearchResults(data);
-        } else {
-          setSearchResults([]);
-        }
-      } catch (err) {
-        console.error("Search error:", err);
-      }
-    }, 300);
-
-    return () => clearTimeout(delay);
-  }, [searchName]);
-
 
   const handleUserClick = async (user) => {
     setSelectedUser(user);
@@ -144,11 +134,11 @@ function Chat() {
               onChange={(e) => setSearchName(e.target.value)}
             />
 
-            {searchResults.length > 0 && (
+            {searchName && searchResults.length > 0 && (
               <div className="search-results">
                 {searchResults.map((user) => (
                   <div
-                    key={user._id}
+                    key={user.id}
                     className="search-result-item"
                     onClick={() => {
                       setSelectedUser(user.name);
@@ -168,9 +158,10 @@ function Chat() {
           {users.map((user, index) => (
             <li
               key={index}
-              className={`user-item ${selectedUser === user ? "active-user" : ""
-                }`}
+              className={`user-item ${selectedUser === user.name ? "active-user" : ""
+                }`} 
               onClick={() => handleUserClick(user.name)}
+              
             >
               <div className="user-info">
                 <div className="user-name">{user.name}</div>
@@ -185,7 +176,7 @@ function Chat() {
         {selectedUser ? (
           <>
             <div className="chat-header">
-              <div>{selectedUser}</div>
+              <div className="name">{selectedUser}</div>
               <div className="menu">
                 <button onClick={() => setShowMenu(!showMenu)}>⋮</button>
                 {showMenu && (

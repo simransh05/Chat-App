@@ -7,8 +7,6 @@ router.post("/signup", controller.signup);
 
 router.post("/login", controller.login);
 
-router.get("/search", controller.getSearch);
-
 router.get("/users", controller.getAllUsers);
 
 router.get("/history", controller.getHistory);

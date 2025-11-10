@@ -34,7 +34,6 @@ io.on("connection", (socket) => {
 
   socket.on("register", (name) => {
     users[name] = socket.id;
-    console.log(users);
   });
 
   socket.on("send_message", async (data) => {
@@ -54,7 +53,6 @@ io.on("connection", (socket) => {
       await newMessage.save();
       const receiverSocketId = users[receiver];
       if (receiverSocketId) {
-        console.log(sender, receiver, message );
         io.to(receiverSocketId).emit("receive_message", { sender, receiver, message });
       }
     } catch (error) {

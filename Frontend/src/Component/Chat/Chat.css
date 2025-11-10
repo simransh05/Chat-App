@@ -4,7 +4,6 @@
   width: 100%;
   margin: 20px auto;
   border: 1px solid #ddd;
-  border-radius: 12px;
   overflow: hidden;
   background: #f9fafb;
   font-family:'Times New Roman', Times, serif;
@@ -12,7 +11,7 @@
 
 .sidebar {
   width: 30%;
-  background-color: rgb(197, 255, 111);
+  background-color: rgb(48, 46, 46);
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
@@ -20,12 +19,12 @@
 
 .sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid green;
+  border-bottom: 1px solid black;
 }
 
 .sidebar-header h2 {
   margin-bottom: 10px;
-  color: #333;
+  color: white;
 }
 .heading{
   display: flex;
@@ -33,7 +32,7 @@
 }
 
 .heading button{
-  background-color: #4a90e2;
+  background-color: rgb(187, 3, 187);
   color: white;
   border: none;
   padding: 8px 10px;
@@ -44,13 +43,13 @@
 }
 
 .heading button:hover{
-  background-color: #357ab7;
+  background-color: purple;
 }
 
 .user-name {
   font-weight: 600;
   font-size: 16px;
-  color: black;
+  color: wheat;
 }
 
 .user-email {
@@ -88,18 +87,20 @@
 }
 
 .search-result-item:hover {
-  background-color: #f1f1f1;
+  background-color: rgb(77, 76, 76);
+  color: white;
 }
 
 .search-bar input {
   flex: 1;
   padding: 8px;
-  border: 1px solid plum;
+  border: none;
   border-radius: 6px;
-  background-color: #f8c9c9;
+  background-color: #1f1d1d;
+  color: wheat;
 }
 .search-bar input:focus{
-  border: 1px solid palevioletred;
+  border: 1px solid white;
 }
 
 .search-bar button:hover {
@@ -119,15 +120,16 @@
   cursor: pointer;
   font-size: large;
   transition: background 0.2s ease;
-  border-bottom: 1px solid salmon;
+  border-bottom: 1px solid grey;
 }
 
 .user-item:hover {
-  background-color: #f0f0f0;
+  background-color: #d6c6c6;
 }
 
 .active-user {
-  background-color: #e8f0ff;
+  background-color: rgb(22, 19, 19);
+  color: white;
   font-weight: 600;
 }
 
@@ -135,14 +137,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #f6f8fc;
+  background-color: white;
 }
 
 .chat-header {
   display: flex;
   justify-content: space-between;
   padding: 16px;
-  background-color: #4a90e2;
+  background-color: #e4effc;
   color: white;
   font-weight: 600;
   border-bottom: 1px solid #ddd;
@@ -150,10 +152,12 @@
   position: relative;
 }
 
+.name{
+  color: black;
+}
 .menu button{
   float: right;
   border: none;
-  background-color: plum;
   border-radius: 4px;
   
 }
@@ -181,7 +185,6 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background-color: rgb(247, 247, 188);
 }
 
 .chat-bubble {
@@ -193,21 +196,20 @@
 
 .sent {
   align-self: flex-end;
-  background-color: #4a90e2;
-  color: white;
+  background-color: #bbd7fc;
+  color: rgb(34, 33, 33);
 }
 
 .received {
   align-self: flex-start;
-  background-color: #e4e6eb;
-  color: #333;
+  background-color: #d5d7db;
+  color: rgb(34, 33, 33);
 }
 
 .chat-footer {
   display: flex;
   border-top: 1px solid #ddd;
   padding: 10px;
-  background: plum;
 }
 
 .chat-footer input {
@@ -216,7 +218,9 @@
   border: 1px solid #ccc;
   border-radius: 20px;
   outline: none;
-  background-color: #f8c9c9;
+}
+.chat-footer input:focus{
+  border: 1px solid grey;
 }
 
 .chat-footer button {
@@ -240,5 +244,11 @@
   justify-content: center;
   color: #666;
   font-size: 16px;
-  background-color: #a5ccf8;
+  background-color: rgb(236, 234, 234);
+}
+
+@media (max-width :600px) {
+  .search-bar input{
+    width: 20%;
+  }
 }

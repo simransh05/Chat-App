@@ -5,7 +5,7 @@ const base_url = import.meta.env.VITE_BASE_URL;
 export const fetchUsers = createAsyncThunk("user/fetchUsers", async (currentUser) => {
     const res = await fetch(`${base_url}/users?name=${currentUser}`);
     const data = await res.json();
-    return data.map((u) => ({ name: u.name, email: u.email }));
+    return data.map((u) => ({ name: u.name, email: u.email ,id:u._id }));
   }
 );
 

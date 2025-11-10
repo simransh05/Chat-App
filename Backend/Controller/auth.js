@@ -54,28 +54,6 @@ async function login(req, res) {
   }
 }
 
-async function getSearch(req, res) {
-  try {
-    const { name, currentUser } = req.query;
-    console.log(name);
-
-    const users = await User.find({
-      $and: [
-        { name: { $regex: name, $options: "i" } },  
-        { name: { $ne: currentUser } }            
-      ]
-    }).select("_id name email");
-
-    console.log(users);
-
-    if (users.length === 0) return res.status(404).json({ message: "No users found" });
-
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-}
-
 async function getAllUsers(req, res) {
   try {
     const { name } = req.query;
@@ -110,4 +88,4 @@ async function getHistory(req, res) {
   }
 }
 
-module.exports = { signup, login, getSearch, getAllUsers, getHistory };
+module.exports = { signup, login, getAllUsers, getHistory };
