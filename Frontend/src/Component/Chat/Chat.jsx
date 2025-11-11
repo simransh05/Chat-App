@@ -5,19 +5,24 @@ import io from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
 import { jwtDecode } from "jwt-decode";
 const socket = io(`${base_url}`);
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "../../Slices/userSlice";
+import axios from "axios"
 
 function Chat() {
-  const dispatch = useDispatch();
-  const { users } = useSelector((state) => state.user)
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState({
+    name: '',
+    existsInUserDB: false,
+    inviteSent:false
+  });
   const [message, setMessage] = useState("");
   const [searchName, setSearchName] = useState("");
   const [messages, setMessages] = useState([]);
   const [FontSize, setFontSize] = useState("normal");
   const [showMenu, setShowMenu] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedBtn, setSelectedBtn] = useState('recentChat');
+  const [recentChats, setRecentChats] = useState([]);
+  const [contacts, setContacts] = useState([]);
+
   const navigate = useNavigate();
 
   const userData = JSON.parse(localStorage.getItem('login-info'));
@@ -38,26 +43,61 @@ function Chat() {
   }, [navigate]);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem("login-info"));
+        const userId = userData?.user?.id;
+
+        const recentRes = await axios.get(`${base_url}/recent/${userId}`);
+        setRecentChats(recentRes.data);
+
+        const contactRes = await axios.get(`${base_url}/contact/${userId}`);
+        setContacts(contactRes.data);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     if (currentUser) {
-      dispatch(fetchUsers(currentUser));
       socket.emit("register", currentUser);
     }
   }, [currentUser]);
 
   useEffect(() => {
-  const handler = setTimeout(() => {
-    if (searchName.trim() === "") {
-      setSearchResults(users);
-    } else {
-      const lower = searchName.toLowerCase();
-      const match = users.filter(u => 
-        u.name.toLowerCase().includes(lower)   
-      );
-      setSearchResults(match);
+    const handler = setTimeout(() => {
+      const listToSearch = selectedBtn === "recentChat" ? recentChats : contacts;
+
+      if (searchName.trim() === "") {
+        setSearchResults(listToSearch);
+      } else {
+        const lower = searchName.toLowerCase();
+        const match = listToSearch.filter((u) =>
+          u.name.toLowerCase().includes(lower)
+        );
+        setSearchResults(match);
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchName, recentChats, contacts, selectedBtn]);
+
+  const handleInvite = async (email) => {
+    try {
+      const userData = JSON.parse(localStorage.getItem("login-info"));
+      const id = userData?.user?.id;
+      const sendData = { userId: id, email }
+
+      const res = await axios.post(`${base_url}/invite`, sendData);
+      setSelectedUser((prev) => ({ ...prev, inviteSent: true }));
+
+    } catch (err) {
+      console.error("Invite error:", err);
     }
-  }, 300); 
-  return () => clearTimeout(handler);
-}, [searchName, users]);
+  };
+
 
 
   useEffect(() => {
@@ -66,15 +106,15 @@ function Chat() {
     });
 
     return () => socket.off("receive_message");
-  }, [selectedUser]);
+  }, [selectedUser.name]);
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!message || !selectedUser) return;
+    if (!message || !selectedUser.name) return;
 
     const msgData = {
       sender: currentUser,
-      receiver: selectedUser,
+      receiver: selectedUser.name,
       message,
     };
 
@@ -85,22 +125,33 @@ function Chat() {
   };
 
   const handleUserClick = async (user) => {
-    setSelectedUser(user);
     try {
-      const res = await fetch(
-        `${base_url}/history?user1=${currentUser}&user2=${user}`
-      );
-      const data = await res.json();
-      const formatted = data.map(m => ({
-        sender: m.sender.name,
-        receiver: m.receiver.name,
-        message: m.content
-      }));
-      setMessages(formatted);
-    } catch (err) {
+      const resCheck = await axios.get(`${base_url}/user-exists?name=${user}`);
+      if (!resCheck.data.exists) {
+        setSelectedUser({ name: user, existsInUserDB: false });
+        return;
+      } else {
+        setSelectedUser({ name: user, existsInUserDB: true })
+        const res = await fetch(
+          `${base_url}/history?user1=${currentUser}&user2=${user}`
+        );
+        const data = await res.json();
+        const formatted = data.map(m => ({
+          sender: m.sender.name,
+          receiver: m.receiver.name,
+          message: m.content
+        }));
+        setMessages(formatted);
+      }
+    }
+    catch (err) {
       console.error("Error loading chat:", err);
     }
   };
+
+  const addContact = () => {
+    navigate('/add-contact');
+  }
 
   const logout = () => {
     localStorage.clear();
@@ -123,6 +174,7 @@ function Chat() {
         <div className="sidebar-header">
           <div className="heading">
             <h2>Chats</h2>
+            <button onClick={addContact}>Add Contact</button>
             <button onClick={logout}>Logout</button>
           </div>
 
@@ -138,10 +190,10 @@ function Chat() {
               <div className="search-results">
                 {searchResults.map((user) => (
                   <div
-                    key={user.id}
+                    key={user.id || user._id}
                     className="search-result-item"
                     onClick={() => {
-                      setSelectedUser(user.name);
+                      setSelectedUser({ name: user, existsInUserDB: true });
                       setSearchName("");
                       setSearchResults([]);
                     }}
@@ -152,75 +204,117 @@ function Chat() {
               </div>
             )}
           </div>
+          <div className="btn-group">
+            <button className="btn" onClick={() => setSelectedBtn('recentChat')}>Recent Chat</button>
+            <button className="btn" onClick={() => setSelectedBtn('myContact')}>My Contact</button>
+          </div>
         </div>
 
         <ul className="user-list">
-          {users.map((user, index) => (
-            <li
-              key={index}
-              className={`user-item ${selectedUser === user.name ? "active-user" : ""
-                }`} 
-              onClick={() => handleUserClick(user.name)}
-              
-            >
-              <div className="user-info">
-                <div className="user-name">{user.name}</div>
-                <div className="user-email">{user.email}</div>
-              </div>
-            </li>
-          ))}
+          {selectedBtn === "recentChat" && recentChats.length > 0 ? (
+            recentChats.map((chat, index) => (
+              <li
+                key={index}
+                className={`user-item ${selectedUser.name === chat.name ? "active-user" : ""}`}
+                onClick={() => handleUserClick(chat.name)}
+              >
+                <div className="user-info">
+                  <div className="user-name">{chat.name}</div>
+                  <div className="user-email">{chat.email}</div>
+                </div>
+              </li>
+            ))
+          ) : selectedBtn === "myContact" && contacts.length > 0 ? (
+            contacts.map((c, index) => (
+              <li key={index} className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`} onClick={() => handleUserClick(c.name)}>
+                <div className="user-info">
+                  <div className="user-name">{c.name}</div>
+                  <div className="user-email">{c.email}</div>
+                </div>
+              </li>
+            ))
+          ) : (
+            <div className="no-chat">No records found</div>
+          )}
         </ul>
       </div>
 
       <div className="chat-area">
-        {selectedUser ? (
-          <>
-            <div className="chat-header">
-              <div className="name">{selectedUser}</div>
-              <div className="menu">
-                <button onClick={() => setShowMenu(!showMenu)}>⋮</button>
-                {showMenu && (
-                  <div className="menu-options">
-                    <button onClick={() => setFontSize("small")}>Small</button>
-                    <button onClick={() => setFontSize("normal")}>Normal</button>
-                    <button onClick={() => setFontSize("large")}>Large</button>
-                  </div>
+        {selectedUser && selectedUser.name ? (
+          selectedUser.existsInUserDB ? (
+            <>
+              <div className="chat-header">
+                <div className="name">{selectedUser.name}</div>
+                <div className="menu">
+                  <button onClick={() => setShowMenu(!showMenu)}>⋮</button>
+                  {showMenu && (
+                    <div className="menu-options">
+                      <button onClick={() => setFontSize("small")}>Small</button>
+                      <button onClick={() => setFontSize("normal")}>Normal</button>
+                      <button onClick={() => setFontSize("large")}>Large</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div
+                className="chat-body"
+                style={{
+                  fontSize:
+                    FontSize === "small"
+                      ? "12px"
+                      : FontSize === "normal"
+                        ? "16px"
+                        : "20px",
+                }}
+              >
+                {messages
+                  .filter(
+                    (msg) =>
+                      (msg.sender === currentUser &&
+                        msg.receiver === selectedUser.name) ||
+                      (msg.sender === selectedUser.name &&
+                        msg.receiver === currentUser)
+                  )
+                  .map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"
+                        }`}
+                    >
+                      {msg.message}
+                    </div>
+                  ))}
+              </div>
+
+              <form className="chat-footer" onSubmit={handleSend}>
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+                <button type="submit">Send</button>
+              </form>
+            </>
+          ) : (
+            <>
+              <div className="no-chat">
+                <p>
+                  {selectedUser.name} is not registered yet. You can invite them to
+                  join the chat app.
+                </p><br/>
+
+                {selectedUser.inviteSent ? (
+                  <button disabled>✅ Invite Already Sent</button>
+                ) : (
+                  <button onClick={() => handleInvite(selectedUser.email)}>
+                    📩 Send Invite
+                  </button>
                 )}
               </div>
-            </div>
-
-            <div className="chat-body" style={{
-              fontSize: FontSize === "small" ? "12px" :
-                FontSize === "normal" ? "16px" :
-                  "20px"
-            }}>
-              {messages
-                .filter(
-                  (msg) =>
-                    (msg.sender === currentUser && msg.receiver === selectedUser) ||
-                    (msg.sender === selectedUser && msg.receiver === currentUser)
-                )
-                .map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"}`}
-                  >
-                    {msg.message}
-                  </div>
-                ))}
-            </div>
-
-
-            <form className="chat-footer" onSubmit={handleSend}>
-              <input
-                type="text"
-                placeholder="Type a message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <button type="submit">Send</button>
-            </form>
-          </>
+            </>
+          )
         ) : (
           <div className="no-chat">Select a user to start chatting</div>
         )}

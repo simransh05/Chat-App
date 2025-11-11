@@ -28,9 +28,11 @@ function Login() {
           user: data.user,
         })
       );
-
+    const info  =JSON.parse(localStorage.getItem('login-info'))
+    const userId = info.user.id;
       console.log("Login successful!");
-      navigate("/chat");
+      console.log(userId)
+      navigate(`/chat/${userId}`);
     } catch (err) {
       alert(err.response?.data?.message || "Login failed!");
     }

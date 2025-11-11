@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 const Message = require("../model/Message");
+const Contact = require('../model/Contact.js');
 require("dotenv").config();
 
 async function signup(req, res) {
@@ -88,4 +89,94 @@ async function getHistory(req, res) {
   }
 }
 
-module.exports = { signup, login, getAllUsers, getHistory };
+async function postContact(req, res) {
+  const { name, email,id } = req.body;
+
+  try {
+    if (!name || !email) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const alreadyUser = await Contact.findOne({ email });
+    if (alreadyUser) {
+      return res.status(409).json({ message: "Contact already exists" });
+    }
+
+    const newContact = new Contact({
+      name,
+      email,
+      userId: id,
+    });
+
+    await newContact.save();
+    res.status(201).json({ message: "Successfully added", contact: newContact });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getContact (req,res) {
+  try {
+    const userId = req.params.id;
+
+    const contacts = await Contact.find({ userId });
+    res.json(contacts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getChat(req, res) {
+  const userId = req.params.id;
+  try {
+    const chats = await Message.find({
+      $or: [{ sender: userId }, { receiver: userId }]
+    }).populate("sender receiver", "name email");
+    const usersSet = new Set();
+    chats.forEach(c => {
+      if (c.sender._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.sender._id, name: c.sender.name, email: c.sender.email }));
+      if (c.receiver._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.receiver._id, name: c.receiver.name, email: c.receiver.email }));
+    });
+
+    const recentUsers = Array.from(usersSet).map(u => JSON.parse(u));
+    res.json(recentUsers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function postInvite(req, res) {
+  const { senderId, email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.status(200).json({ message: "User exists, open chat", user });
+    } else {
+      const contact = await Contact.findOneAndUpdate(
+        { userId: senderId, email },
+        { inviteSent: true },
+        { new: true, upsert: true }
+      );
+      return res.status(200).json({ message: "Invite sent", contact });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getUser(req, res) {
+  const { name } = req.query;
+  try {
+    const user = await User.findOne({ name });
+    res.json({ exists: !!user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+module.exports = { signup, login, getAllUsers, getHistory, postContact ,getChat,getUser ,postInvite ,getContact} ;

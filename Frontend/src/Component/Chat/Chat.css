@@ -42,7 +42,23 @@
   margin: 10px;
 }
 
-.heading button:hover{
+.btn-group{
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.btn-group button{
+  background-color: rgb(187, 3, 187);
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  height: 30px;
+  margin: 10px;
+}
+.heading button:hover,
+.btn-group button:hover{
   background-color: purple;
 }
 
