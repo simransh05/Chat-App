@@ -99,7 +99,7 @@ async function postContact(req, res) {
 
     const alreadyUser = await Contact.findOne({ email });
     if (alreadyUser) {
-      return res.status(409).json({ message: "Contact already exists" });
+      return res.status(200).json({ message: "Contact already exists" });
     }
 
     const newContact = new Contact({

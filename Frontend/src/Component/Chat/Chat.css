@@ -5,67 +5,71 @@
   margin: 20px auto;
   border: 1px solid #ddd;
   overflow: hidden;
-  background: #f9fafb;
-  font-family:'Times New Roman', Times, serif;
+  background: #f0f2f5;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .sidebar {
   width: 30%;
-  background-color: rgb(48, 46, 46);
-  border-right: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  border-right: 1px solid #ddd;
+  color: #111b21;
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid black;
+  background-color: #f0f2f5;
+  border-bottom: 1px solid #ddd;
 }
 
 .sidebar-header h2 {
   margin-bottom: 10px;
-  color: white;
+  color: #111b21;
 }
-.heading{
+
+.heading {
   display: flex;
   justify-content: space-around;
 }
 
-.heading button{
-  background-color: rgb(187, 3, 187);
-  color: white;
+.heading button {
+  background-color: #00a884;      
+  color: #fff;
   border: none;
+  border-radius: 8px;
   padding: 8px 10px;
-  border-radius: 6px;
   cursor: pointer;
   height: 30px;
   margin: 10px;
 }
 
-.btn-group{
+.btn-group {
   display: flex;
   justify-content: space-evenly;
 }
 
-.btn-group button{
-  background-color: rgb(187, 3, 187);
-  color: white;
+.btn-group button {
+  background-color: #00a884;       
+  color: #fff;
   border: none;
+  border-radius: 8px;
   padding: 8px 10px;
-  border-radius: 6px;
   cursor: pointer;
   height: 30px;
   margin: 10px;
 }
+
 .heading button:hover,
-.btn-group button:hover{
-  background-color: purple;
+.btn-group button:hover {
+   background-color: #029e7f;
 }
 
 .user-name {
   font-weight: 600;
   font-size: 16px;
-  color: wheat;
+  color: black;
 }
 
 .user-email {
@@ -100,23 +104,25 @@
   padding: 8px;
   cursor: pointer;
   font-size: 15px;
+  background-color: #111b21;
+  color: #e9edef;
 }
 
 .search-result-item:hover {
-  background-color: rgb(77, 76, 76);
+  background-color: #2a3942;
   color: white;
 }
 
 .search-bar input {
   flex: 1;
   padding: 8px;
-  border: none;
-  border-radius: 6px;
-  background-color: #1f1d1d;
-  color: wheat;
+  background-color: #f0f2f5;
+  color: #111b21;
+  border-radius: 8px;
 }
-.search-bar input:focus{
-  border: 1px solid white;
+
+.search-bar input:focus {
+  border: 1px solid ;
 }
 
 .search-bar button:hover {
@@ -129,6 +135,7 @@
   margin: 0;
   flex-grow: 1;
   overflow-y: auto;
+  position: relative;
 }
 
 .user-item {
@@ -136,15 +143,32 @@
   cursor: pointer;
   font-size: large;
   transition: background 0.2s ease;
-  border-bottom: 1px solid grey;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eee;
 }
 
 .user-item:hover {
-  background-color: #d6c6c6;
+  background-color: #f5f6f6;
+}
+
+.add-contact{
+  position: absolute;
+  background-color: #00a884;      
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  height: 30px;
+  margin: 10px;
+}
+
+.add-contact:hover{
+  background-color: #029e7f;
 }
 
 .active-user {
-  background-color: rgb(22, 19, 19);
+   background-color: #e9f5f2;
   color: white;
   font-weight: 600;
 }
@@ -153,31 +177,33 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: #efeae2;
 }
 
 .chat-header {
   display: flex;
   justify-content: space-between;
   padding: 16px;
-  background-color: #e4effc;
-  color: white;
-  font-weight: 600;
+  background-color: #f0f2f5;
+  color: #111b21;
   border-bottom: 1px solid #ddd;
+  font-weight: 600;
   font-size: 26px;
   position: relative;
 }
 
-.name{
+.name {
   color: black;
 }
-.menu button{
+
+.menu button {
   float: right;
   border: none;
   border-radius: 4px;
-  
+
 }
-.menu-options{
+
+.menu-options {
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -185,7 +211,7 @@
   top: 35px;
 }
 
-.menu-options button{
+.menu-options button {
   padding: 10px 16px;
   background-color: white;
   color: gray;
@@ -212,45 +238,48 @@
 
 .sent {
   align-self: flex-end;
-  background-color: #bbd7fc;
-  color: rgb(34, 33, 33);
+  background-color: #d9fdd3;      
+  color: #111b21;
 }
 
 .received {
   align-self: flex-start;
-  background-color: #d5d7db;
-  color: rgb(34, 33, 33);
+  background-color: #ffffff;
+  color: #111b21;
 }
 
 .chat-footer {
   display: flex;
-  border-top: 1px solid #ddd;
+  background-color: #f0f2f5;
+  border-top: 1px solid #ccc;
   padding: 10px;
 }
 
 .chat-footer input {
   flex: 1;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
+  background-color: #ffffff;
+  color: #111b21;
+  border-radius: 8px;
   outline: none;
 }
-.chat-footer input:focus{
+
+.chat-footer input:focus {
   border: 1px solid grey;
 }
 
 .chat-footer button {
   margin-left: 10px;
   padding: 10px 16px;
-  background-color: #4a90e2;
-  color: white;
+  background-color: #00a884;
+  color: #fff;
   border: none;
   border-radius: 20px;
   cursor: pointer;
 }
 
 .chat-footer button:hover {
-  background-color: #357ab7;
+  background-color: #029e7f;
 }
 
 .no-chat {
@@ -264,7 +293,7 @@
 }
 
 @media (max-width :600px) {
-  .search-bar input{
+  .search-bar input {
     width: 20%;
   }
 }

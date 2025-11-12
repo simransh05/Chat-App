@@ -11,7 +11,7 @@ function Chat() {
   const [selectedUser, setSelectedUser] = useState({
     name: '',
     existsInUserDB: false,
-    inviteSent:false
+    inviteSent: false
   });
   const [message, setMessage] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -68,13 +68,22 @@ function Chat() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      const listToSearch = selectedBtn === "recentChat" ? recentChats : contacts;
+      const normalizeUser = (u) => ({
+        ...u,
+        _id: String(u._id || u.id || u.userId || u.user?._id),
+      });
+
+      const allUsers = [
+        ...new Map(
+          [...recentChats, ...contacts].map((u) => [normalizeUser(u)._id, normalizeUser(u)])
+        ).values(),
+      ];
 
       if (searchName.trim() === "") {
-        setSearchResults(listToSearch);
+        setSearchResults(allUsers);
       } else {
         const lower = searchName.toLowerCase();
-        const match = listToSearch.filter((u) =>
+        const match = allUsers.filter((u) =>
           u.name.toLowerCase().includes(lower)
         );
         setSearchResults(match);
@@ -173,8 +182,7 @@ function Chat() {
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="heading">
-            <h2>Chats</h2>
-            <button onClick={addContact}>Add Contact</button>
+            <h2>{currentUser}'s Chat</h2>
             <button onClick={logout}>Logout</button>
           </div>
 
@@ -225,14 +233,18 @@ function Chat() {
               </li>
             ))
           ) : selectedBtn === "myContact" && contacts.length > 0 ? (
-            contacts.map((c, index) => (
-              <li key={index} className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`} onClick={() => handleUserClick(c.name)}>
-                <div className="user-info">
-                  <div className="user-name">{c.name}</div>
-                  <div className="user-email">{c.email}</div>
-                </div>
-              </li>
-            ))
+            <>
+              {contacts.map((c, index) => (
+                <li key={index} className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`} onClick={() => handleUserClick(c.name)}>
+                  <div className="user-info">
+                    <div className="user-name">{c.name}</div>
+                    <div className="user-email">{c.email}</div>
+                  </div>
+                </li>
+
+              ))}
+              <button className="add-contact" onClick={addContact}>Add Contact</button>
+            </>
           ) : (
             <div className="no-chat">No records found</div>
           )}
@@ -240,7 +252,7 @@ function Chat() {
       </div>
 
       <div className="chat-area">
-        {selectedUser && selectedUser.name ? (
+        {selectedUser.name ? (
           selectedUser.existsInUserDB ? (
             <>
               <div className="chat-header">
@@ -303,7 +315,7 @@ function Chat() {
                 <p>
                   {selectedUser.name} is not registered yet. You can invite them to
                   join the chat app.
-                </p><br/>
+                </p><br />
 
                 {selectedUser.inviteSent ? (
                   <button disabled>✅ Invite Already Sent</button>

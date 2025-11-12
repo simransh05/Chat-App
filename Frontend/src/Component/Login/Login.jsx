@@ -32,7 +32,9 @@ function Login() {
     const userId = info.user.id;
       console.log("Login successful!");
       console.log(userId)
-      navigate(`/chat/${userId}`);
+      if(info){
+        navigate(`/chat`);
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Login failed!");
     }
