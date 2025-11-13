@@ -1,38 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from "@mui/material";
+import axios from "axios";
+
 const base_url = import.meta.env.VITE_BASE_URL;
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-function AddContact() {
-    const [data, setData] = useState({ name: '', email: '' });
 
-    const navigate = useNavigate();
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setData(prev => ({ ...prev, [name]: value }));
-    };
+function AddContact({ open, onClose, onSuccess }) {
+  const [data, setData] = useState({ name: "", email: "" });
 
-    const save = async (e) => {
-        e.preventDefault();
-        const login = JSON.parse(localStorage.getItem('login-info'));
-        const id = login.user.id;
-        const allData = { name: data.name, email: data.email, id };
-        console.log(allData)
-        const submitData = await axios.post(`${base_url}/contact`, allData);
-        navigate(`/chat/${id}`)
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    return (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const login = JSON.parse(localStorage.getItem("login-info"));
+      const id = login.user.id;
+      const allData = { ...data, id };
 
-        <div className="auth-container">
-            <h2>Add Contact</h2>
-            <form onSubmit={save}>
-                <input name="name" type="text" placeholder="Name" onChange={handleChange} required />
-                <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
-                <button type="submit">Add Contact</button>
-            </form>
+      await axios.post(`${base_url}/contact`, allData);
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Failed to add contact", error);
+      alert("Error adding contact!");
+    }
+  };
 
-        </div>
-    );
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Add New Contact</DialogTitle>
+      <DialogContent>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Name"
+            name="name"
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+            required
+          />
+          <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export default AddContact;

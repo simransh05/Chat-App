@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Chat.css";
 import { useNavigate } from "react-router-dom";
+import { Button, Box, Tabs, Tab } from "@mui/material";
 import io from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
 import { jwtDecode } from "jwt-decode";
 const socket = io(`${base_url}`);
 import axios from "axios"
+import AddContact from "../AddContact/AddContact";
 
 function Chat() {
   const [selectedUser, setSelectedUser] = useState({
@@ -22,6 +24,14 @@ function Chat() {
   const [selectedBtn, setSelectedBtn] = useState('recentChat');
   const [recentChats, setRecentChats] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const chatBodyRef = useRef(null);
+
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [messages, selectedUser.name]);
 
   const navigate = useNavigate();
 
@@ -41,6 +51,17 @@ function Chat() {
       navigate("/login");
     }
   }, [navigate]);
+
+  const fetchContacts = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem("login-info"));
+      const userId = userData?.user?.id;
+      const res = await axios.get(`${base_url}/contact/${userId}`);
+      setContacts(res.data);
+    } catch (err) {
+      console.error("Error fetching contacts:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,21 +90,21 @@ function Chat() {
   useEffect(() => {
     const handler = setTimeout(() => {
       const normalizeUser = (u) => ({
-        ...u,
-        _id: String(u._id || u.id || u.userId || u.user?._id),
+        name: u.name?.trim(),
+        email: u.email || "",
+        id: u._id || u.id || null,
       });
 
-      const allUsers = [
-        ...new Map(
-          [...recentChats, ...contacts].map((u) => [normalizeUser(u)._id, normalizeUser(u)])
-        ).values(),
-      ];
+      const merged = [...recentChats, ...contacts].map(normalizeUser);
+      const uniqueUsers = Array.from(
+        new Map(merged.map((u) => [u.name.toLowerCase(), u])).values()
+      );
 
       if (searchName.trim() === "") {
-        setSearchResults(allUsers);
+        setSearchResults(uniqueUsers);
       } else {
         const lower = searchName.toLowerCase();
-        const match = allUsers.filter((u) =>
+        const match = uniqueUsers.filter((u) =>
           u.name.toLowerCase().includes(lower)
         );
         setSearchResults(match);
@@ -92,6 +113,7 @@ function Chat() {
 
     return () => clearTimeout(handler);
   }, [searchName, recentChats, contacts, selectedBtn]);
+
 
   const handleInvite = async (email) => {
     try {
@@ -106,8 +128,6 @@ function Chat() {
       console.error("Invite error:", err);
     }
   };
-
-
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
@@ -127,10 +147,14 @@ function Chat() {
       message,
     };
 
-    socket.emit("send_message", msgData);
-
-    setMessages((prev) => [...prev, msgData]);
-    setMessage("");
+    socket.emit("send_message", msgData, (res) => {
+      if (res.status === 'ok') {
+        setMessages((prev) => [...prev, msgData]);
+        setMessage("");
+      } else {
+        console.log(res.message);
+      }
+    });
   };
 
   const handleUserClick = async (user) => {
@@ -141,11 +165,10 @@ function Chat() {
         return;
       } else {
         setSelectedUser({ name: user, existsInUserDB: true })
-        const res = await fetch(
+        const res = await axios.get(
           `${base_url}/history?user1=${currentUser}&user2=${user}`
         );
-        const data = await res.json();
-        const formatted = data.map(m => ({
+        const formatted = res.data.map(m => ({
           sender: m.sender.name,
           receiver: m.receiver.name,
           message: m.content
@@ -157,10 +180,6 @@ function Chat() {
       console.error("Error loading chat:", err);
     }
   };
-
-  const addContact = () => {
-    navigate('/add-contact');
-  }
 
   const logout = () => {
     localStorage.clear();
@@ -175,6 +194,10 @@ function Chat() {
   useEffect(() => {
     localStorage.setItem('font', FontSize)
   }, [FontSize])
+
+  const handleChange = (_, value) => {
+    setSelectedBtn(value);
+  };
 
   return (
     <div className="chat-app">
@@ -201,7 +224,8 @@ function Chat() {
                     key={user.id || user._id}
                     className="search-result-item"
                     onClick={() => {
-                      setSelectedUser({ name: user, existsInUserDB: true });
+                      handleUserClick(user.name)
+                      setSelectedUser({ name: user.name, existsInUserDB: true, inviteSent: false });
                       setSearchName("");
                       setSearchResults([]);
                     }}
@@ -212,10 +236,12 @@ function Chat() {
               </div>
             )}
           </div>
-          <div className="btn-group">
-            <button className="btn" onClick={() => setSelectedBtn('recentChat')}>Recent Chat</button>
-            <button className="btn" onClick={() => setSelectedBtn('myContact')}>My Contact</button>
-          </div>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs value={selectedBtn} onChange={handleChange}>
+              <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px' }} />
+              <Tab label="My Contact" value="myContact" sx={{ width: '180px' }} />
+            </Tabs>
+          </Box>
         </div>
 
         <ul className="user-list">
@@ -243,7 +269,20 @@ function Chat() {
                 </li>
 
               ))}
-              <button className="add-contact" onClick={addContact}>Add Contact</button>
+              <Button
+                onClick={() => setShowAddContact(true)}
+                variant="contained"
+                color="primary"
+                sx={{ m: 2 }}
+              >
+                Add Contact
+              </Button>
+
+              <AddContact
+                open={showAddContact}
+                onClose={() => setShowAddContact(false)}
+                onSuccess={fetchContacts}
+              />
             </>
           ) : (
             <div className="no-chat">No records found</div>
@@ -278,7 +317,9 @@ function Chat() {
                       : FontSize === "normal"
                         ? "16px"
                         : "20px",
+                  overflowY: "auto",
                 }}
+                ref={chatBodyRef}
               >
                 {messages
                   .filter(

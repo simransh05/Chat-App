@@ -121,10 +121,6 @@
   border-radius: 8px;
 }
 
-.search-bar input:focus {
-  border: 1px solid ;
-}
-
 .search-bar button:hover {
   background-color: #357ab7;
 }
@@ -265,7 +261,7 @@
 }
 
 .chat-footer input:focus {
-  border: 1px solid grey;
+  border: 1px solid black;
 }
 
 .chat-footer button {

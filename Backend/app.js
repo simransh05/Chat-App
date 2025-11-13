@@ -36,7 +36,7 @@ io.on("connection", (socket) => {
     users[name] = socket.id;
   });
 
-  socket.on("send_message", async (data) => {
+  socket.on("send_message", async (data , callback) => {
     const { receiver, message, sender } = data;
 
     try {
@@ -55,6 +55,7 @@ io.on("connection", (socket) => {
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("receive_message", { sender, receiver, message });
       }
+      callback({ status: "ok" });
     } catch (error) {
       console.error("Error saving message:", error);
     }
