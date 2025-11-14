@@ -18,6 +18,10 @@ const contactSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
+    },
+    inviteSent: {
+        type: Boolean,
+        required: true,
     }
 });
 

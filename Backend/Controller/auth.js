@@ -90,7 +90,7 @@ async function getHistory(req, res) {
 }
 
 async function postContact(req, res) {
-  const { name, email,id } = req.body;
+  const { name, email, id } = req.body;
 
   try {
     if (!name || !email) {
@@ -106,6 +106,7 @@ async function postContact(req, res) {
       name,
       email,
       userId: id,
+      inviteSent: false
     });
 
     await newContact.save();
@@ -116,11 +117,12 @@ async function postContact(req, res) {
   }
 }
 
-async function getContact (req,res) {
+async function getContact(req, res) {
   try {
     const userId = req.params.id;
 
     const contacts = await Contact.find({ userId });
+    console.log(contacts);
     res.json(contacts);
   } catch (err) {
     console.error(err);
@@ -158,8 +160,8 @@ async function postInvite(req, res) {
     } else {
       const contact = await Contact.findOneAndUpdate(
         { userId: senderId, email },
-        { inviteSent: true },
-        { new: true, upsert: true }
+        { $set: { inviteSent: true } },
+        { new: true }
       );
       return res.status(200).json({ message: "Invite sent", contact });
     }
@@ -169,14 +171,4 @@ async function postInvite(req, res) {
   }
 }
 
-async function getUser(req, res) {
-  const { name } = req.query;
-  try {
-    const user = await User.findOne({ name });
-    res.json({ exists: !!user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-}
-module.exports = { signup, login, getAllUsers, getHistory, postContact ,getChat,getUser ,postInvite ,getContact} ;
+module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact };

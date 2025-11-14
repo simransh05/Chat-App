@@ -19,7 +19,5 @@ router.get("/recent/:id", controller.getChat);
 
 router.post("/invite", controller.postInvite);
 
-router.get("/user-exists", controller.getUser);
-
 
 module.exports = router;

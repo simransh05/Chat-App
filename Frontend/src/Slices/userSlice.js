@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../utils/Api";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
 export const fetchUsers = createAsyncThunk("user/fetchUsers", async (currentUser) => {
-    const res = await fetch(`${base_url}/users?name=${currentUser}`);
-    const data = await res.json();
-    return data.map((u) => ({ name: u.name, email: u.email ,id:u._id }));
+    const res = await api.userFetch(currentUser);
+    console.log(currentUser)
+    return res.data.map((u) => ({ name: u.name, email: u.email ,id:u._id }));
   }
 );
 

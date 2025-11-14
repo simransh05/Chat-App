@@ -27,7 +27,7 @@ function AddContact({ open, onClose, onSuccess }) {
       const allData = { ...data, id };
 
       await axios.post(`${base_url}/contact`, allData);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(allData);
       onClose();
     } catch (error) {
       console.error("Failed to add contact", error);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "./Chat.css";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Button, Box, Tabs, Tab } from "@mui/material";
 import io from "socket.io-client";
@@ -8,8 +9,21 @@ import { jwtDecode } from "jwt-decode";
 const socket = io(`${base_url}`);
 import axios from "axios"
 import AddContact from "../AddContact/AddContact";
+import { addContactLocal, fetchContacts } from "../../Slices/contactSlice";
+import { fetchRecentChats } from "../../Slices/recentSlice";
+import { fetchUsers } from "../../Slices/userSlice";
 
 function Chat() {
+
+  const dispatch = useDispatch();
+  const contacts = useSelector((state) => state.contact.contact);
+  const recentChats = useSelector((state) => state.recent.chat);
+  const users = useSelector((state) => state.user.users);
+  const navigate = useNavigate();
+
+  const userData = JSON.parse(localStorage.getItem('login-info'));
+  const currentUser = userData?.user?.name;
+
   const [selectedUser, setSelectedUser] = useState({
     name: '',
     existsInUserDB: false,
@@ -22,21 +36,20 @@ function Chat() {
   const [showMenu, setShowMenu] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [selectedBtn, setSelectedBtn] = useState('recentChat');
-  const [recentChats, setRecentChats] = useState([]);
-  const [contacts, setContacts] = useState([]);
   const [showAddContact, setShowAddContact] = useState(false);
   const chatBodyRef = useRef(null);
+
+  useEffect(() => {
+    dispatch(fetchContacts(currentUser));
+    dispatch(fetchRecentChats(currentUser));
+    dispatch(fetchUsers(currentUser));
+  }, [currentUser]);
 
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages, selectedUser.name]);
-
-  const navigate = useNavigate();
-
-  const userData = JSON.parse(localStorage.getItem('login-info'));
-  const currentUser = userData?.user?.name;
 
   useEffect(() => {
     const token = localStorage.getItem("login-info");
@@ -51,35 +64,6 @@ function Chat() {
       navigate("/login");
     }
   }, [navigate]);
-
-  const fetchContacts = async () => {
-    try {
-      const userData = JSON.parse(localStorage.getItem("login-info"));
-      const userId = userData?.user?.id;
-      const res = await axios.get(`${base_url}/contact/${userId}`);
-      setContacts(res.data);
-    } catch (err) {
-      console.error("Error fetching contacts:", err);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem("login-info"));
-        const userId = userData?.user?.id;
-
-        const recentRes = await axios.get(`${base_url}/recent/${userId}`);
-        setRecentChats(recentRes.data);
-
-        const contactRes = await axios.get(`${base_url}/contact/${userId}`);
-        setContacts(contactRes.data);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -157,22 +141,36 @@ function Chat() {
     });
   };
 
-  const handleUserClick = async (user) => {
+  useEffect(() => {
+    console.log("Updated selectedUser:", selectedUser);
+  }, [selectedUser]);
+
+  const handleUserClick = async (name) => {
     try {
-      const resCheck = await axios.get(`${base_url}/user-exists?name=${user}`);
-      if (!resCheck.data.exists) {
-        setSelectedUser({ name: user, existsInUserDB: false });
-        return;
-      } else {
-        setSelectedUser({ name: user, existsInUserDB: true })
+      const freshContacts = [...contacts];        
+      const freshUsers = [...users];
+
+      const userExists = freshUsers.some(u => u.name === name);
+
+      const contactEntry = freshContacts.find(c => c.name === name);
+
+      const nextSelected = {
+        name,
+        existsInUserDB: userExists,
+        inviteSent: contactEntry?.inviteSent === true   
+      };
+      setSelectedUser(nextSelected);
+      if (userExists) {
         const res = await axios.get(
-          `${base_url}/history?user1=${currentUser}&user2=${user}`
+          `${base_url}/history?user1=${currentUser}&user2=${name}`
         );
+
         const formatted = res.data.map(m => ({
           sender: m.sender.name,
           receiver: m.receiver.name,
           message: m.content
         }));
+
         setMessages(formatted);
       }
     }
@@ -225,7 +223,6 @@ function Chat() {
                     className="search-result-item"
                     onClick={() => {
                       handleUserClick(user.name)
-                      setSelectedUser({ name: user.name, existsInUserDB: true, inviteSent: false });
                       setSearchName("");
                       setSearchResults([]);
                     }}
@@ -244,31 +241,46 @@ function Chat() {
           </Box>
         </div>
 
-        <ul className="user-list">
-          {selectedBtn === "recentChat" && recentChats.length > 0 ? (
-            recentChats.map((chat, index) => (
-              <li
-                key={index}
-                className={`user-item ${selectedUser.name === chat.name ? "active-user" : ""}`}
-                onClick={() => handleUserClick(chat.name)}
-              >
-                <div className="user-info">
-                  <div className="user-name">{chat.name}</div>
-                  <div className="user-email">{chat.email}</div>
-                </div>
-              </li>
-            ))
-          ) : selectedBtn === "myContact" && contacts.length > 0 ? (
-            <>
-              {contacts.map((c, index) => (
-                <li key={index} className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`} onClick={() => handleUserClick(c.name)}>
-                  <div className="user-info">
-                    <div className="user-name">{c.name}</div>
-                    <div className="user-email">{c.email}</div>
-                  </div>
-                </li>
 
-              ))}
+        <ul className="user-list">
+          {selectedBtn === "recentChat" ? (
+            <>
+              {recentChats.length > 0 ? (
+                recentChats.map((chat, index) => (
+                  <li
+                    key={index}
+                    className={`user-item ${selectedUser.name === chat.name ? "active-user" : ""}`}
+                    onClick={() => handleUserClick(chat.name)}
+                  >
+                    <div className="user-info">
+                      <div className="user-name">{chat.name}</div>
+                      <div className="user-email">{chat.email}</div>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <div className="no-chat">No records found</div>
+              )}
+            </>
+          ) : selectedBtn === "myContact" ? (
+            <>
+              {contacts.length > 0 ? (
+                contacts.map((c, index) => (
+                  <li
+                    key={index}
+                    className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`}
+                    onClick={() => handleUserClick(c.name)}
+                  >
+                    <div className="user-info">
+                      <div className="user-name">{c.name}</div>
+                      <div className="user-email">{c.email}</div>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <div className="no-chat">No records found</div>
+              )}
+
               <Button
                 onClick={() => setShowAddContact(true)}
                 variant="contained"
@@ -277,17 +289,15 @@ function Chat() {
               >
                 Add Contact
               </Button>
-
-              <AddContact
-                open={showAddContact}
-                onClose={() => setShowAddContact(false)}
-                onSuccess={fetchContacts}
-              />
             </>
-          ) : (
-            <div className="no-chat">No records found</div>
-          )}
+          ) : null}
         </ul>
+
+        <AddContact
+          open={showAddContact}
+          onClose={() => setShowAddContact(false)}
+          onSuccess={(newContact) => dispatch(addContactLocal(newContact))}
+        />
       </div>
 
       <div className="chat-area">
