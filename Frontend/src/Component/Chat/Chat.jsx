@@ -7,11 +7,12 @@ import io from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
 import { jwtDecode } from "jwt-decode";
 const socket = io(`${base_url}`);
-import axios from "axios"
 import AddContact from "../AddContact/AddContact";
-import { addContactLocal, fetchContacts } from "../../Slices/contactSlice";
+import { fetchContacts } from "../../Slices/contactSlice";
 import { fetchRecentChats } from "../../Slices/recentSlice";
 import { fetchUsers } from "../../Slices/userSlice";
+import api from "../../utils/Api";
+import { FiLogOut } from "react-icons/fi";
 
 function Chat() {
 
@@ -26,6 +27,7 @@ function Chat() {
 
   const [selectedUser, setSelectedUser] = useState({
     name: '',
+    email: '',
     existsInUserDB: false,
     inviteSent: false
   });
@@ -103,9 +105,10 @@ function Chat() {
     try {
       const userData = JSON.parse(localStorage.getItem("login-info"));
       const id = userData?.user?.id;
-      const sendData = { userId: id, email }
+      const sendData = { senderId: id, email }
 
-      const res = await axios.post(`${base_url}/invite`, sendData);
+      const res = await api.postInvite(sendData);
+      dispatch(fetchContacts(currentUser));
       setSelectedUser((prev) => ({ ...prev, inviteSent: true }));
 
     } catch (err) {
@@ -141,13 +144,9 @@ function Chat() {
     });
   };
 
-  useEffect(() => {
-    console.log("Updated selectedUser:", selectedUser);
-  }, [selectedUser]);
-
-  const handleUserClick = async (name) => {
+  const handleUserClick = async (name, email) => {
     try {
-      const freshContacts = [...contacts];        
+      const freshContacts = [...contacts];
       const freshUsers = [...users];
 
       const userExists = freshUsers.some(u => u.name === name);
@@ -156,14 +155,13 @@ function Chat() {
 
       const nextSelected = {
         name,
+        email,
         existsInUserDB: userExists,
-        inviteSent: contactEntry?.inviteSent === true   
+        inviteSent: contactEntry?.inviteSent === true
       };
       setSelectedUser(nextSelected);
       if (userExists) {
-        const res = await axios.get(
-          `${base_url}/history?user1=${currentUser}&user2=${name}`
-        );
+        const res = await api.getHistory(currentUser, name);
 
         const formatted = res.data.map(m => ({
           sender: m.sender.name,
@@ -197,14 +195,26 @@ function Chat() {
     setSelectedBtn(value);
   };
 
+  const getInitials = (name) => {
+    if (!name) return "";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+
   return (
     <div className="chat-app">
 
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="heading">
-            <h2>{currentUser}'s Chat</h2>
-            <button onClick={logout}>Logout</button>
+            <div className="profile-avatar">
+              {getInitials(currentUser)}
+            </div>
+            <FiLogOut onClick={logout} className="logout-icon" />
           </div>
 
           <div className="search-bar">
@@ -235,8 +245,8 @@ function Chat() {
           </div>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs value={selectedBtn} onChange={handleChange}>
-              <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px' }} />
-              <Tab label="My Contact" value="myContact" sx={{ width: '180px' }} />
+              <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
+              <Tab label="My Contact" value="myContact" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
             </Tabs>
           </Box>
         </div>
@@ -250,7 +260,7 @@ function Chat() {
                   <li
                     key={index}
                     className={`user-item ${selectedUser.name === chat.name ? "active-user" : ""}`}
-                    onClick={() => handleUserClick(chat.name)}
+                    onClick={() => handleUserClick(chat.name, chat.email)}
                   >
                     <div className="user-info">
                       <div className="user-name">{chat.name}</div>
@@ -269,7 +279,7 @@ function Chat() {
                   <li
                     key={index}
                     className={`user-item ${selectedUser.name === c.name ? "active-user" : ""}`}
-                    onClick={() => handleUserClick(c.name)}
+                    onClick={() => handleUserClick(c.name, c.email)}
                   >
                     <div className="user-info">
                       <div className="user-name">{c.name}</div>
@@ -281,22 +291,26 @@ function Chat() {
                 <div className="no-chat">No records found</div>
               )}
 
-              <Button
-                onClick={() => setShowAddContact(true)}
-                variant="contained"
-                color="primary"
-                sx={{ m: 2 }}
-              >
-                Add Contact
-              </Button>
+
             </>
           ) : null}
         </ul>
+        {selectedBtn === "myContact" && (
+          <Button
+            onClick={() => setShowAddContact(true)}
+            variant="contained"
+            color="primary"
+            sx={{ m: 2 }}
+            className="add-contact"
+          >
+            Add Contact
+          </Button>
+        )}
 
         <AddContact
           open={showAddContact}
           onClose={() => setShowAddContact(false)}
-          onSuccess={(newContact) => dispatch(addContactLocal(newContact))}
+          onSuccess={() => dispatch(fetchContacts(currentUser))}
         />
       </div>
 

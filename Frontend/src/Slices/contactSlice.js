@@ -21,11 +21,7 @@ const contactSlice = createSlice({
         error: null,
     },
 
-    reducers: {
-        addContactLocal: (state, action) => {
-            state.contact.push(action.payload);
-        },
-    },
+    reducers: {},
 
     extraReducers: (builder) => {
         builder
@@ -42,5 +38,4 @@ const contactSlice = createSlice({
     },
 });
 
-export const { addContactLocal } = contactSlice.actions;
 export default contactSlice.reducer;

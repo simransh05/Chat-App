@@ -16,6 +16,7 @@
   color: #111b21;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .sidebar-header {
@@ -24,9 +25,19 @@
   border-bottom: 1px solid #ddd;
 }
 
-.sidebar-header h2 {
+.profile-avatar {
+  width: 45px;
+  height: 45px;
+  background-color: #1976d2; 
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
   margin-bottom: 10px;
-  color: #111b21;
 }
 
 .heading {
@@ -34,36 +45,15 @@
   justify-content: space-around;
 }
 
-.heading button {
-  background-color: #00a884;      
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 10px;
+.logout-icon {
+  font-size: 24px; 
   cursor: pointer;
-  height: 30px;
-  margin: 10px;
+  color: #1e88e5;   
+  margin-left: 10px;
 }
 
-.btn-group {
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.btn-group button {
-  background-color: #00a884;       
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
-  height: 30px;
-  margin: 10px;
-}
-
-.heading button:hover,
-.btn-group button:hover {
-   background-color: #029e7f;
+.logout-icon:hover {
+  color: #1565c0;   
 }
 
 .user-name {
@@ -147,24 +137,13 @@
   background-color: #f5f6f6;
 }
 
-.add-contact{
-  position: absolute;
-  background-color: #00a884;      
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
-  height: 30px;
-  margin: 10px;
-}
-
-.add-contact:hover{
-  background-color: #029e7f;
+.add-contact {
+  margin-top: auto;
+  align-self: flex-end;
 }
 
 .active-user {
-   background-color: #e9f5f2;
+  background-color: #e9f5f2;
   color: white;
   font-weight: 600;
 }
@@ -234,7 +213,7 @@
 
 .sent {
   align-self: flex-end;
-  background-color: #d9fdd3;      
+  background-color: #d9fdd3;
   color: #111b21;
 }
 
@@ -285,12 +264,16 @@
   align-items: center;
   justify-content: center;
   color: #666;
-  font-size: 16px;
+  font-size: 20px;
   background-color: rgb(236, 234, 234);
 }
 
 @media (max-width :600px) {
+  .sidebar {
+    width: 40%;
+  }
+
   .search-bar input {
-    width: 20%;
+    width: 100%;
   }
 }

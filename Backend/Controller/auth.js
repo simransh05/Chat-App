@@ -122,7 +122,6 @@ async function getContact(req, res) {
     const userId = req.params.id;
 
     const contacts = await Contact.find({ userId });
-    console.log(contacts);
     res.json(contacts);
   } catch (err) {
     console.error(err);
@@ -152,19 +151,14 @@ async function getChat(req, res) {
 
 async function postInvite(req, res) {
   const { senderId, email } = req.body;
-
   try {
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(200).json({ message: "User exists, open chat", user });
-    } else {
-      const contact = await Contact.findOneAndUpdate(
-        { userId: senderId, email },
-        { $set: { inviteSent: true } },
-        { new: true }
-      );
-      return res.status(200).json({ message: "Invite sent", contact });
-    }
+    const contact = await Contact.findOneAndUpdate(
+      { userId: senderId, email },
+      { $set: { inviteSent: true } },
+      { new: true }
+    );
+    return res.status(200).json({ message: "Invite sent", contact });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

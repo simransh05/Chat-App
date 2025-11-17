@@ -7,7 +7,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import axios from "axios";
+import api from "../../utils/Api";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
@@ -20,13 +20,13 @@ function AddContact({ open, onClose, onSuccess }) {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     try {
       const login = JSON.parse(localStorage.getItem("login-info"));
       const id = login.user.id;
       const allData = { ...data, id };
-
-      await axios.post(`${base_url}/contact`, allData);
+      await api.postContact(allData);
       if (onSuccess) onSuccess(allData);
       onClose();
     } catch (error) {
@@ -58,8 +58,8 @@ function AddContact({ open, onClose, onSuccess }) {
             required
           />
           <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button onClick={onClose} sx={{ textTransform: "none" }}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary" sx={{ textTransform: "none" }}>
               Add
             </Button>
           </DialogActions>

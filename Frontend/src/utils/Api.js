@@ -16,6 +16,17 @@ const api = {
     },
     userFetch: async (currentUser) => {
         return await axios.get(`${base_url}/users?name=${currentUser}`)
+    },
+    getHistory: async (currentUser, name) => {
+        return await axios.get(
+            `${base_url}/history?user1=${currentUser}&user2=${name}`
+        );
+    },
+    postInvite: async (sendData) => {
+        return await axios.post(`${base_url}/invite`, sendData);
+    },
+    postContact: async (allData) => {
+        return await axios.post(`${base_url}/contact`, allData);
     }
 }
 
