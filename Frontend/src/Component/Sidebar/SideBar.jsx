@@ -1,0 +1,124 @@
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers } from '../../Slices/userSlice';
+import { Box, Tabs, Tab } from "@mui/material";
+import UserList from './UserList';
+import SidebarHeader from './SidebarHeader';
+import SearchBar from './SearchBar';
+import AddContactButton from './AddContactButton';
+import api from "../../utils/Api";
+
+function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages }) {
+    const dispatch = useDispatch();
+    const users = useSelector((state) => state.user.users);
+    const contacts = useSelector((state) => state.contact.contact);
+    const recentChats = useSelector((state) => state.recent.chat);
+    const [selectedBtn, setSelectedBtn] = useState('recentChat');
+    const [searchName, setSearchName] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    useEffect(() => {
+        dispatch(fetchUsers(currentUser))
+    }, [currentUser])
+    const handleUserClick = async (name, email) => {
+        try {
+            const freshContacts = [...contacts];
+            const freshUsers = [...users];
+
+            const userExists = freshUsers.some(u => u.name === name);
+
+            const contactEntry = freshContacts.find(c => c.name === name);
+
+            const nextSelected = {
+                name,
+                email,
+                existsInUserDB: userExists,
+                inviteSent: contactEntry?.inviteSent === true
+            };
+            setSelectedUser(nextSelected);
+            if (userExists) {
+                const res = await api.getHistory(currentUser, name);
+
+                const formatted = res.data.map(m => ({
+                    sender: m.sender.name,
+                    receiver: m.receiver.name,
+                    message: m.content
+                }));
+
+                setMessages(formatted);
+            }
+        }
+        catch (err) {
+            console.error("Error loading chat:", err);
+        }
+    };
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            const normalizeUser = (u) => ({
+                name: u.name?.trim(),
+                email: u.email || "",
+                id: u._id || u.id || null,
+            });
+
+            const merged = [...recentChats, ...contacts].map(normalizeUser);
+            const uniqueUsers = Array.from(
+                new Map(merged.map((u) => [u.name.toLowerCase(), u])).values()
+            );
+
+            if (searchName.trim() === "") {
+                setSearchResults(uniqueUsers);
+            } else {
+                const lower = searchName.toLowerCase();
+                const match = uniqueUsers.filter((u) =>
+                    u.name.toLowerCase().includes(lower)
+                );
+                setSearchResults(match);
+            }
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [searchName, contacts]);
+
+    const handleChange = (_, value) => {
+        setSelectedBtn(value);
+    };
+
+
+    return (
+        <div className="sidebar">
+            <div className="sidebar-header">
+
+                <SidebarHeader
+                    currentUser={currentUser}
+                />
+
+                <SearchBar
+                    handleUserClick={handleUserClick}
+                    searchResults={searchResults}
+                    searchName={searchName}
+                    setSearchName={setSearchName}
+                    setSearchResults={setSearchResults}
+                />
+                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                    <Tabs value={selectedBtn} onChange={handleChange}>
+                        <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
+                        <Tab label="My Contact" value="myContact" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
+                    </Tabs>
+                </Box>
+            </div>
+
+
+            <UserList
+                handleUserClick={handleUserClick}
+                selectedBtn={selectedBtn}
+                selectedUser={selectedUser} />
+
+            <AddContactButton
+                selectedBtn={selectedBtn}
+                currentUser={currentUser}
+            />
+        </div>
+    )
+}
+
+export default Sidebar
