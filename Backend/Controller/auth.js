@@ -18,6 +18,7 @@ async function signup(req, res) {
       name,
       email,
       password: hashedPassword,
+      ProfilePic: ''
     });
 
     await newUser.save();
@@ -33,7 +34,7 @@ async function login(req, res) {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
@@ -48,7 +49,7 @@ async function login(req, res) {
     res.status(200).json({
       message: "Login successful",
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, ProfilePic: user.ProfilePic },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -165,4 +166,31 @@ async function postInvite(req, res) {
   }
 }
 
-module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact };
+async function uploadFile(req, res) {
+  try {
+    const { userId } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const url = `/uploads/${req.file.filename}`;
+
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      { ProfilePic: url },
+      { new: true }
+    );
+
+    console.log(updated)
+
+    res.json({
+      message: "Profile picture updated",
+      ProfilePic: updated.ProfilePic,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Upload failed", error: err.message });
+  }
+}
+module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile };

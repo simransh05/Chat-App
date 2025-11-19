@@ -27,6 +27,9 @@ const api = {
     },
     postContact: async (allData) => {
         return await axios.post(`${base_url}/contact`, allData);
+    },
+    uploadProfile: async (formData) => {
+        return await axios.post(`${base_url}/upload`, formData);
     }
 }
 

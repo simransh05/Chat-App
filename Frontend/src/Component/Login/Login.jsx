@@ -28,15 +28,20 @@ function Login() {
           user: data.user,
         })
       );
-    const info  =JSON.parse(localStorage.getItem('login-info'))
-    const userId = info.user.id;
+      const info = JSON.parse(localStorage.getItem('login-info'))
+      const userId = info.user.id;
       console.log("Login successful!");
       console.log(userId)
-      if(info){
+      if (info) {
         navigate(`/chat`);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed!");
+      if (err.response?.status == '404') {
+        navigate('/signup')
+      } else {
+        alert(err.response?.data?.message || "Login failed!");
+      }
+
     }
   };
 

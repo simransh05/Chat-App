@@ -1,5 +1,7 @@
 const express = require("express");
 const controller = require("../Controller/auth");
+const multer = require('multer');
+const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 
@@ -19,5 +21,6 @@ router.get("/recent/:id", controller.getChat);
 
 router.post("/invite", controller.postInvite);
 
+router.post("/upload", upload.single("ProfilePic"), controller.uploadFile);
 
 module.exports = router;

@@ -19,7 +19,7 @@ function Chat() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userData = JSON.parse(localStorage.getItem('login-info'));
-  const currentUser = userData?.user?.name;
+  const currentUser= userData?.user;
 
   const [selectedUser, setSelectedUser] = useState({
     name: '',
@@ -32,9 +32,9 @@ function Chat() {
   const [FontSize, setFontSize] = useState("normal");
 
   useEffect(() => {
-    dispatch(fetchContacts(currentUser));
-    dispatch(fetchRecentChats(currentUser));
-  }, [currentUser]);
+    dispatch(fetchContacts(currentUser.name));
+    dispatch(fetchRecentChats(currentUser.name));
+  }, [currentUser.name]);
 
   useEffect(() => {
     const token = localStorage.getItem("login-info");
@@ -51,10 +51,10 @@ function Chat() {
   }, [navigate]);
 
   useEffect(() => {
-    if (currentUser) {
-      socket.emit("register", currentUser);
+    if (currentUser.name) {
+      socket.emit("register", currentUser.name);
     }
-  }, [currentUser]);
+  }, [currentUser.name]);
 
   const handleInvite = async (email) => {
     try {
@@ -63,7 +63,7 @@ function Chat() {
       const sendData = { senderId: id, email }
 
       const res = await api.postInvite(sendData);
-      dispatch(fetchContacts(currentUser));
+      dispatch(fetchContacts(currentUser.name));
       setSelectedUser((prev) => ({ ...prev, inviteSent: true }));
 
     } catch (err) {
@@ -84,7 +84,7 @@ function Chat() {
     if (!message || !selectedUser.name) return;
 
     const msgData = {
-      sender: currentUser,
+      sender: currentUser.name,
       receiver: selectedUser.name,
       message,
     };
@@ -128,7 +128,7 @@ function Chat() {
                 messages={messages}
                 selectedUser={selectedUser}
                 FontSize={FontSize}
-                currentUser={currentUser} />
+                currentUser={currentUser.name} />
 
               <ChatFooter
                 handleSend={handleSend}

@@ -10,6 +10,7 @@ const Message = require("./model/Message");
 
 dotenv.config();
 const app = express();
+app.use("/uploads", express.static("uploads")); // make folder(uploads) public 
 
 app.use(cors({
   origin: 'http://localhost:5173',
