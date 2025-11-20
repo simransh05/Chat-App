@@ -22,7 +22,11 @@ const contactSchema = new mongoose.Schema({
     inviteSent: {
         type: Boolean,
         required: true,
-    }
+    },
+    contactId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
 });
 
 module.exports = mongoose.model("Contact", contactSchema);

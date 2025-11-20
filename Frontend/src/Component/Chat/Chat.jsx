@@ -19,7 +19,7 @@ function Chat() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userData = JSON.parse(localStorage.getItem('login-info'));
-  const currentUser= userData?.user;
+  const currentUser = userData?.user;
 
   const [selectedUser, setSelectedUser] = useState({
     name: '',
@@ -108,13 +108,23 @@ function Chat() {
     localStorage.setItem('font', FontSize)
   }, [FontSize])
 
+  const getInitials = (name) => {
+    if (!name) return "";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   return (
     <div className="chat-app">
 
       <SideBar currentUser={currentUser}
         selectedUser={selectedUser}
         setSelectedUser={setSelectedUser}
-        setMessages={setMessages} />
+        setMessages={setMessages}
+        getInitials={getInitials} />
 
       <div className="chat-area">
         {selectedUser.name ? (
@@ -122,7 +132,8 @@ function Chat() {
             <>
               <ChatHeader
                 selectedUser={selectedUser}
-                setFontSize={setFontSize} />
+                setFontSize={setFontSize}
+                getInitials={getInitials} />
 
               <ChatBody
                 messages={messages}

@@ -102,15 +102,21 @@ async function postContact(req, res) {
     if (alreadyUser) {
       return res.status(200).json({ message: "Contact already exists" });
     }
+    const userPresent = await User.findOne({ email });
 
     const newContact = new Contact({
       name,
       email,
       userId: id,
-      inviteSent: false
+      inviteSent: false,
+      contactId: userPresent ? userPresent._id : null
     });
 
     await newContact.save();
+    if (!userPresent) {
+      newContact.contactId = newContact._id;
+      await newContact.save();
+    }
     res.status(201).json({ message: "Successfully added", contact: newContact });
   } catch (err) {
     console.error(err.message);
@@ -122,8 +128,18 @@ async function getContact(req, res) {
   try {
     const userId = req.params.id;
 
-    const contacts = await Contact.find({ userId });
-    res.json(contacts);
+    const contacts = await Contact.find({ userId }) .populate("contactId", "ProfilePic");
+    console.log(contacts)
+     const result = contacts.map(c => ({
+      userId,
+      id:c._id,                         
+      name:c.name,
+      email:c.email,
+      inviteSent: c.inviteSent,
+      createdAt:c.createdAt,
+      ProfilePic: c.contactId?.ProfilePic || "",
+    }));
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -135,14 +151,15 @@ async function getChat(req, res) {
   try {
     const chats = await Message.find({
       $or: [{ sender: userId }, { receiver: userId }]
-    }).populate("sender receiver", "name email");
+    }).populate("sender receiver", "name email ProfilePic");
     const usersSet = new Set();
     chats.forEach(c => {
-      if (c.sender._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.sender._id, name: c.sender.name, email: c.sender.email }));
-      if (c.receiver._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.receiver._id, name: c.receiver.name, email: c.receiver.email }));
+      if (c.sender._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.sender._id, name: c.sender.name, email: c.sender.email, ProfilePic: c.sender.ProfilePic }));
+      if (c.receiver._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.receiver._id, name: c.receiver.name, email: c.receiver.email, ProfilePic: c.receiver.ProfilePic }));
     });
 
     const recentUsers = Array.from(usersSet).map(u => JSON.parse(u));
+    console.log(recentUsers)
     res.json(recentUsers);
   } catch (err) {
     console.error(err);

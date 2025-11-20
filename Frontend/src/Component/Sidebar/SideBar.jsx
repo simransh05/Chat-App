@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import AddContactButton from './AddContactButton';
 import api from "../../utils/Api";
 
-function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages }) {
+function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages ,getInitials}) {
     const dispatch = useDispatch();
     const users = useSelector((state) => state.user.users);
     const contacts = useSelector((state) => state.contact.contact);
@@ -36,7 +36,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages }) {
             };
             setSelectedUser(nextSelected);
             if (userExists) {
-                const res = await api.getHistory(currentUser, name);
+                const res = await api.getHistory(currentUser.name, name);
 
                 const formatted = res.data.map(m => ({
                     sender: m.sender.name,
@@ -90,6 +90,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages }) {
 
                 <SidebarHeader
                     currentUser={currentUser}
+                    getInitials={getInitials}
                 />
 
                 <SearchBar
@@ -111,7 +112,9 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages }) {
             <UserList
                 handleUserClick={handleUserClick}
                 selectedBtn={selectedBtn}
-                selectedUser={selectedUser} />
+                selectedUser={selectedUser}
+                getInitials={getInitials}
+                />
 
             <AddContactButton
                 selectedBtn={selectedBtn}
