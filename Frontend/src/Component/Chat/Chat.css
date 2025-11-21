@@ -47,26 +47,49 @@
 }
 
 .avatar-img {
-  width: 90%;
-  height: 90%;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  image-rendering:crisp-edges;
+}
+
+.avatar-img img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
 
 .heading {
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+
+}
+
+.username {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111b21;
 }
 
 .logout-icon {
   font-size: 24px;
   cursor: pointer;
-  color: #1e88e5;
+  color: #00a884;
   margin-left: 10px;
 }
 
 .logout-icon:hover {
-  color: #1565c0;
+  color: #029e7f;
 }
 
 .user-name {
@@ -186,8 +209,8 @@
 
 .add-contact {
   position: absolute !important;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0px;
+  right: 0px;
 }
 
 .active-user {

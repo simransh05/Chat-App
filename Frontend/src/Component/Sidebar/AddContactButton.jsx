@@ -1,6 +1,6 @@
 import React from 'react'
 import AddContact from "../AddContact/AddContact";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from 'react-redux';
 import { fetchContacts } from '../../Slices/contactSlice';
@@ -10,15 +10,17 @@ function AddContactButton({ currentUser, selectedBtn }) {
     return (
         <>
             {selectedBtn === "myContact" && (
-                <Button
-                    onClick={() => setShowAddContact(true)}
-                    variant="contained"
-                    color="primary"
-                    sx={{ m: 2 }}
-                    className="add-contact"
-                >
-                    Add Contact
-                </Button>
+                <Tooltip title="Add Contact" placement="right">
+                    <Button
+                        onClick={() => setShowAddContact(true)}
+                        variant="contained"
+                        color="primary"
+                        sx={{ m: 2, backgroundColor: "#00a884",minWidth:0 , width: "40px", height: "30px" , borderRadius: "50%", fontSize: "24px", padding: ""}}
+                        className="add-contact"
+                    >
+                        +
+                    </Button>
+                </Tooltip>
             )}
 
             <AddContact

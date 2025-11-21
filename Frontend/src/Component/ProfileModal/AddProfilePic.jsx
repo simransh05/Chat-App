@@ -8,10 +8,11 @@ import {
     Stack
 } from "@mui/material";
 import api from "../../utils/Api";
+const base_url = import.meta.env.VITE_BASE_URL;
 
 function AddProfilePic({ open, currentUser, close, onUpload }) {
     const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(currentUser.ProfilePic || null);
+    const [preview, setPreview] = useState(`${base_url}${currentUser.ProfilePic}` || null);
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
@@ -52,6 +53,14 @@ function AddProfilePic({ open, currentUser, close, onUpload }) {
                     {currentUser.ProfilePic ? "Update Profile Picture" : "Add Profile Picture"}
                 </Typography>
 
+                <Typography>
+                    {currentUser.name}
+                </Typography>
+
+                <Typography>
+                    {currentUser.email}
+                </Typography>
+
                 <Stack spacing={2} alignItems="center">
                     {preview ? (
                         <Avatar
@@ -74,7 +83,7 @@ function AddProfilePic({ open, currentUser, close, onUpload }) {
                     <Button variant="outlined" onClick={close} sx={{ textTransform: "none" }}>
                         Cancel
                     </Button>
-                    <Button variant="contained" onClick={()=> uploadFile(file)} sx={{ textTransform: "none" }}>
+                    <Button variant="contained" disabled={!file} onClick={()=> uploadFile(file)} sx={{ textTransform: "none" }}>
                         {currentUser.ProfilePic ? "Update" : "Upload"}
                     </Button>
                 </Stack>

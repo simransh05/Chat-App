@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import AddContactButton from './AddContactButton';
 import api from "../../utils/Api";
 
-function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages ,getInitials}) {
+function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials }) {
     const dispatch = useDispatch();
     const users = useSelector((state) => state.user.users);
     const contacts = useSelector((state) => state.contact.contact);
@@ -102,8 +102,8 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages ,getI
                 />
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                     <Tabs value={selectedBtn} onChange={handleChange}>
-                        <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
-                        <Tab label="My Contact" value="myContact" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" } }} />
+                        <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" }, "@media (max-width:1100px)": { width: "40px" }, textTransform: "none" }} />
+                        <Tab label="My Contact" value="myContact" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" }, "@media (max-width:1100px)": { width: "40px" }, textTransform: "none" }} />
                     </Tabs>
                 </Box>
             </div>
@@ -114,7 +114,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages ,getI
                 selectedBtn={selectedBtn}
                 selectedUser={selectedUser}
                 getInitials={getInitials}
-                />
+            />
 
             <AddContactButton
                 selectedBtn={selectedBtn}

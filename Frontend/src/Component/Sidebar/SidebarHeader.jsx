@@ -56,6 +56,9 @@ function SidebarHeader({ currentUser, getInitials }) {
                     onUpload={(pic) => upload(pic)}
                 />
             )}
+            <div className='username'>
+                {currentUser.name}
+            </div>
             <FiLogOut onClick={logout} className="logout-icon" />
         </div>
     )
