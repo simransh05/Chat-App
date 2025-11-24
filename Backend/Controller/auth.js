@@ -24,7 +24,7 @@ async function signup(req, res) {
     await newUser.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    console.error("Signup error:", error);
+    // console.error("Signup error:", error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -77,7 +77,7 @@ async function getHistory(req, res) {
       $or: [
         { sender: userA._id, receiver: userB._id },
         { sender: userB._id, receiver: userA._id }
-      ]
+      ], deletedBy: { $ne: user1 }
     })
       .sort({ createdAt: 1 })
       .populate("sender", "name")
@@ -85,7 +85,7 @@ async function getHistory(req, res) {
 
     res.json(messages);
   } catch (err) {
-    console.error("Error fetching chat history:", err);
+    // console.error("Error fetching chat history:", err);
     res.status(500).json({ message: "Error fetching chat history" });
   }
 }
@@ -119,7 +119,7 @@ async function postContact(req, res) {
     }
     res.status(201).json({ message: "Successfully added", contact: newContact });
   } catch (err) {
-    console.error(err.message);
+    // console.error(err.message);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -128,20 +128,20 @@ async function getContact(req, res) {
   try {
     const userId = req.params.id;
 
-    const contacts = await Contact.find({ userId }) .populate("contactId", "ProfilePic");
-    console.log(contacts)
-     const result = contacts.map(c => ({
+    const contacts = await Contact.find({ userId }).populate("contactId", "ProfilePic");
+    // console.log(contacts)
+    const result = contacts.map(c => ({
       userId,
-      id:c._id,                         
-      name:c.name,
-      email:c.email,
+      id: c._id,
+      name: c.name,
+      email: c.email,
       inviteSent: c.inviteSent,
-      createdAt:c.createdAt,
+      createdAt: c.createdAt,
       ProfilePic: c.contactId?.ProfilePic || "",
     }));
     res.json(result);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -159,10 +159,10 @@ async function getChat(req, res) {
     });
 
     const recentUsers = Array.from(usersSet).map(u => JSON.parse(u));
-    console.log(recentUsers)
+    // console.log(recentUsers)
     res.json(recentUsers);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -178,7 +178,7 @@ async function postInvite(req, res) {
     return res.status(200).json({ message: "Invite sent", contact });
 
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -199,7 +199,7 @@ async function uploadFile(req, res) {
       { new: true }
     );
 
-    console.log(updated)
+    // console.log(updated)
 
     res.json({
       message: "Profile picture updated",
@@ -210,4 +210,55 @@ async function uploadFile(req, res) {
     res.status(500).json({ message: "Upload failed", error: err.message });
   }
 }
-module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile };
+
+async function updateName(req, res) {
+  try {
+    const { userId, name } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ message: "Name cannot be empty" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { name },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Name updated successfully",
+      user
+    });
+
+  } catch (error) {
+    // console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+async function deleteChat(req, res) {
+  const { user1, user2 } = req.params;
+  console.log(user1,user2);
+  try {
+    await Message.updateMany(
+      {
+        $or: [
+          { senderId: user1, receiverId: user2 },
+          { senderId: user2, receiverId: user1 },
+        ]
+      },
+      { $addToSet: { deletedBy: user1 } }   // prevents duplicate entries
+    );
+
+    res.json({ success: true, message: "Chat deleted for you" });
+  } catch (error) {
+    console.error("Delete for me error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat };

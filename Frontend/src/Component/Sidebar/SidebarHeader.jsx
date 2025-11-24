@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import AddProfilePic from '../ProfileModal/AddProfilePic';
 const base_url = import.meta.env.VITE_BASE_URL;
-function SidebarHeader({ currentUser, getInitials }) {
+function SidebarHeader({ currentUser, getInitials , setCurrentUser }) {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
 
@@ -52,6 +52,7 @@ function SidebarHeader({ currentUser, getInitials }) {
                 <AddProfilePic
                     open={showModal}
                     currentUser={currentUser}
+                    setCurrentUser={setCurrentUser}
                     close={() => setShowModal(false)}
                     onUpload={(pic) => upload(pic)}
                 />

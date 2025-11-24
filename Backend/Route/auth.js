@@ -23,4 +23,9 @@ router.post("/invite", controller.postInvite);
 
 router.post("/upload", upload.single("ProfilePic"), controller.uploadFile);
 
+router.put("/update-name", controller.updateName);
+
+router.delete("/delete/:user1/:user2", controller.deleteChat);
+
+
 module.exports = router;

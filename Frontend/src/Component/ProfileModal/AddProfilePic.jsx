@@ -10,15 +10,43 @@ import {
 import api from "../../utils/Api";
 const base_url = import.meta.env.VITE_BASE_URL;
 
-function AddProfilePic({ open, currentUser, close, onUpload }) {
+function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(`${base_url}${currentUser.ProfilePic}` || null);
+    const [editName, setEditName] = useState(false);
+    const [newName, setNewName] = useState(currentUser.name);
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
         setFile(selected);
         setPreview(URL.createObjectURL(selected));
     };
+
+    const updateName = async () => {
+        if (newName === currentUser.name || newName.trim() === "") {
+            setEditName(false);
+            return;
+        }
+        try {
+            const info = JSON.parse(localStorage.getItem("login-info"));
+
+            const res = await api.updateName({
+                userId: info.user.id,
+                name: newName
+            });
+
+            info.user.name = newName;
+            localStorage.setItem("login-info", JSON.stringify(info));
+
+            setCurrentUser({ ...currentUser, name: newName })
+
+            setEditName(false);
+        } catch (err) {
+            console.log(err);
+            alert("Could not update name");
+        }
+    };
+
 
     const uploadFile = async (file) => {
         const info = JSON.parse(localStorage.getItem("login-info"));
@@ -53,9 +81,29 @@ function AddProfilePic({ open, currentUser, close, onUpload }) {
                     {currentUser.ProfilePic ? "Update Profile Picture" : "Add Profile Picture"}
                 </Typography>
 
-                <Typography>
-                    {currentUser.name}
-                </Typography>
+                {editName ? (
+                    <input
+                        autoFocus
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onBlur={updateName}
+                        style={{
+                            border: "1px solid #ccc",
+                            padding: "5px 8px",
+                            borderRadius: "5px",
+                            fontSize: "16px",
+                            width: "70%",
+                            textAlign: "center"
+                        }}
+                    />
+                ) : (
+                    <Typography
+                        onClick={() => setEditName(true)}
+                        sx={{ cursor: "pointer", fontWeight: "bold", mt: 1 }}
+                    >
+                        {newName}
+                    </Typography>
+                )}
 
                 <Typography>
                     {currentUser.email}
@@ -73,17 +121,30 @@ function AddProfilePic({ open, currentUser, close, onUpload }) {
                         </Avatar>
                     )}
 
-                    <Button variant="contained" component="label" sx={{ textTransform: "none" }}>
-                        Choose File
-                        <input type="file" accept="image/*" hidden onChange={handleFileChange} />
-                    </Button>
+                    <label htmlFor="profile-file">
+                        <Button
+                            variant="contained"
+                            component="span"
+                            sx={{ textTransform: "none" }}
+                        >
+                            Choose File
+                        </Button>
+
+                        <input
+                            id="profile-file"
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={handleFileChange}
+                        />
+                    </label>
                 </Stack>
 
                 <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: "center" }}>
                     <Button variant="outlined" onClick={close} sx={{ textTransform: "none" }}>
                         Cancel
                     </Button>
-                    <Button variant="contained" disabled={!file} onClick={()=> uploadFile(file)} sx={{ textTransform: "none" }}>
+                    <Button variant="contained" disabled={!file} onClick={() => uploadFile(file)} sx={{ textTransform: "none" }}>
                         {currentUser.ProfilePic ? "Update" : "Upload"}
                     </Button>
                 </Stack>

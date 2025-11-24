@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import AddContactButton from './AddContactButton';
 import api from "../../utils/Api";
 
-function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials }) {
+function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials ,setCurrentUser}) {
     const dispatch = useDispatch();
     const users = useSelector((state) => state.user.users);
     const contacts = useSelector((state) => state.contact.contact);
@@ -29,6 +29,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const contactEntry = freshContacts.find(c => c.name === name);
 
             const nextSelected = {
+                id :userExists.id || contactEntry.id,
                 name,
                 email,
                 existsInUserDB: userExists,
@@ -91,6 +92,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                 <SidebarHeader
                     currentUser={currentUser}
                     getInitials={getInitials}
+                    setCurrentUser={setCurrentUser}
                 />
 
                 <SearchBar

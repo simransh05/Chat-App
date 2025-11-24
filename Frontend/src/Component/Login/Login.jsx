@@ -2,17 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/Api";
 
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   useEffect(() => {
-    const alreadyUser = localStorage.getItem('login-info');
-    if (alreadyUser) navigate('/chat')
-  }, [])
+    const alreadyUser = localStorage.getItem("login-info");
+    if (alreadyUser) navigate("/chat");
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,34 +41,69 @@ function Login() {
           user: data.user,
         })
       );
-      const info = JSON.parse(localStorage.getItem('login-info'))
-      const userId = info.user.id;
-      console.log("Login successful!");
-      console.log(userId)
-      if (info) {
-        navigate(`/chat`);
-      }
+
+      navigate("/chat");
     } catch (err) {
-      if (err.response?.status == '404') {
-        navigate('/signup')
+      if (err.response?.status == "404") {
+        navigate("/signup");
       } else {
         alert(err.response?.data?.message || "Login failed!");
       }
-
     }
   };
 
-
   return (
-    <div className="auth-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
-        <button type="submit">Login</button>
-      </form>
-      <p>Don’t have an account? <Link to="/signup">Signup</Link></p>
-    </div>
+    <Box display="flex" justifyContent="center" mt={5}>
+      <Paper elevation={3} sx={{ padding: 4, width: "350px" }}>
+        <Typography variant="h5" textAlign="center" mb={2}>
+          Login
+        </Typography>
+
+        <form onSubmit={handleLogin}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            onChange={handleChange}
+            margin="normal"
+            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Button
+            fullWidth
+            variant="contained"
+            type="submit"
+            sx={{ mt: 2 }}
+          >
+            Login
+          </Button>
+        </form>
+
+        <Typography mt={2} textAlign="center">
+          Don’t have an account? <Link to="/signup">Signup</Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }
 

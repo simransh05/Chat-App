@@ -18,10 +18,12 @@ import ChatFooter from "./ChatFooter";
 function Chat() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userData = JSON.parse(localStorage.getItem('login-info'));
-  const currentUser = userData?.user;
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem("login-info"))?.user
+  );
 
   const [selectedUser, setSelectedUser] = useState({
+    id:"",
     name: '',
     email: '',
     existsInUserDB: false,
@@ -124,7 +126,8 @@ function Chat() {
         selectedUser={selectedUser}
         setSelectedUser={setSelectedUser}
         setMessages={setMessages}
-        getInitials={getInitials} />
+        getInitials={getInitials}
+        setCurrentUser={setCurrentUser} />
 
       <div className="chat-area">
         {selectedUser.name ? (
@@ -133,7 +136,11 @@ function Chat() {
               <ChatHeader
                 selectedUser={selectedUser}
                 setFontSize={setFontSize}
-                getInitials={getInitials} />
+                getInitials={getInitials}
+                currentUser={currentUser}
+                setMessages={setMessages}
+                onChatDeleted={() => setSelectedUser(null)}
+              />
 
               <ChatBody
                 messages={messages}

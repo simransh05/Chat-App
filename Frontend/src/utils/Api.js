@@ -30,6 +30,12 @@ const api = {
     },
     uploadProfile: async (formData) => {
         return await axios.post(`${base_url}/upload`, formData);
+    },
+    updateName :async (data) => {
+        return await axios.put(`${base_url}/update-name`, data);
+    },
+    deleteChat :async (currentUser, selectedUser) => {
+        await axios.delete(`/delete/${currentUser}/${selectedUser}`);
     }
 }
 

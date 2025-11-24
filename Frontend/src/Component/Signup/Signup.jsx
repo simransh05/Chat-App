@@ -27,6 +27,12 @@ function Signup() {
     setError("");
   };
 
+  function isValidEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
+
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -36,6 +42,10 @@ function Signup() {
     }
 
     try {
+      if (!isValidEmail(formData.email)) {
+        alert("Please enter a valid email!");
+        return;
+      }
       await api.createUser(formData);
       navigate("/login");
     } catch (err) {
@@ -47,6 +57,8 @@ function Signup() {
     <Box
       display="flex"
       justifyContent="center"
+      borderRadius={"5px"}
+      fontFamily={"'Times New Roman', Times, serif"}
       mt={5}
     >
       <Paper elevation={3} sx={{ padding: 4, width: "350px" }}>
