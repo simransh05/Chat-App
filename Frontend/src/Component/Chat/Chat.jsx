@@ -23,7 +23,7 @@ function Chat() {
   );
 
   const [selectedUser, setSelectedUser] = useState({
-    id:"",
+    id: "",
     name: '',
     email: '',
     existsInUserDB: false,
@@ -37,6 +37,16 @@ function Chat() {
     dispatch(fetchContacts(currentUser.name));
     dispatch(fetchRecentChats(currentUser.name));
   }, [currentUser.name]);
+
+  const normalizeMsg = (msg) => {
+    if (!msg) return null;
+
+    return {
+      message: msg?.message ||msg?.content ||  "",
+      sender: msg?.sender?.name || "",   
+      receiver: msg?.receiver?.name || ""
+    };
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("login-info");
@@ -75,25 +85,35 @@ function Chat() {
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      setMessages((prev) => [...prev, data]);
+
+      setMessages(prev => [...prev, normalizeMsg(data)]);
     });
 
     return () => socket.off("receive_message");
-  }, [selectedUser.name]);
+  }, []);
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!message || !selectedUser.name) return;
+    if (!message || !selectedUser?.name) return;
 
     const msgData = {
-      sender: currentUser.name,
-      receiver: selectedUser.name,
+      senderId: currentUser.id,
+      receiverId: selectedUser.id,
       message,
     };
+    console.log(message)
 
     socket.emit("send_message", msgData, (res) => {
+      console.log(res.status === 'ok')
       if (res.status === 'ok') {
-        setMessages((prev) => [...prev, msgData]);
+        setMessages(prev => [
+          ...prev,
+          {
+            sender: currentUser.name,
+            receiver: selectedUser.name,
+            message
+          }
+        ]);
         setMessage("");
       } else {
         console.log(res.message);
@@ -127,10 +147,11 @@ function Chat() {
         setSelectedUser={setSelectedUser}
         setMessages={setMessages}
         getInitials={getInitials}
-        setCurrentUser={setCurrentUser} />
+        setCurrentUser={setCurrentUser}
+        normalizeMsg={normalizeMsg} />
 
       <div className="chat-area">
-        {selectedUser.name ? (
+        {selectedUser?.name ? (
           selectedUser.existsInUserDB ? (
             <>
               <ChatHeader
@@ -139,7 +160,7 @@ function Chat() {
                 getInitials={getInitials}
                 currentUser={currentUser}
                 setMessages={setMessages}
-                onChatDeleted={() => setSelectedUser(null)}
+                setSelectedUser={setSelectedUser}
               />
 
               <ChatBody

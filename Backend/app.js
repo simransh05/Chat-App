@@ -13,9 +13,9 @@ const app = express();
 app.use("/uploads", express.static("uploads")); // make folder(uploads) public 
 
 app.use(cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 app.use(express.json());
 
@@ -38,12 +38,12 @@ io.on("connection", (socket) => {
     users[name] = socket.id;
   });
 
-  socket.on("send_message", async (data , callback) => {
-    const { receiver, message, sender } = data;
+  socket.on("send_message", async (data, callback) => {
+    const { senderId, receiverId, message } = data;
 
     try {
-      const senderUser = await User.findOne({ name: sender });
-      const receiverUser = await User.findOne({ name: receiver });
+      const senderUser = await User.findById(senderId);
+      const receiverUser = await User.findById(receiverId);
 
       if (!senderUser || !receiverUser) return;
 
@@ -53,9 +53,19 @@ io.on("connection", (socket) => {
         content: message,
       });
       await newMessage.save();
-      const receiverSocketId = users[receiver];
+      console.log("messages", newMessage)
+      const receiverSocketId = users[receiverId];
+      await newMessage.populate([
+        { path: "sender", select: "name email" },
+        { path: "receiver", select: "name email" }
+      ]);
+      console.log("after save", newMessage)
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit("receive_message", { sender, receiver, message });
+        io.to(receiverSocketId).emit("receive_message", {
+          sender: newMessage.sender.name,
+          receiver: newMessage.receiver.name,
+          message: newMessage.content
+        });
       }
       callback({ status: "ok" });
     } catch (error) {

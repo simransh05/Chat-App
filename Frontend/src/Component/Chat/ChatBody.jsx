@@ -1,5 +1,5 @@
-import React from 'react'
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
+
 function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
     const chatBodyRef = useRef(null);
 
@@ -8,6 +8,7 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
             chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
         }
     }, [messages, selectedUser.name]);
+
     return (
         <div
             className="chat-body"
@@ -22,25 +23,27 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
             }}
             ref={chatBodyRef}
         >
-            {messages
-                .filter(
-                    (msg) =>
-                        (msg.sender === currentUser &&
-                            msg.receiver === selectedUser.name) ||
-                        (msg.sender === selectedUser.name &&
-                            msg.receiver === currentUser)
-                )
-                .map((msg, index) => (
-                    <div
-                        key={index}
-                        className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"
-                            }`}
-                    >
-                        {msg.message}
-                    </div>
-                ))}
+            {console.log('messages', messages)}
+            {messages.length === 0 ? (
+                <div className="no-messages"></div>
+            ) : (
+                messages
+                    .filter(
+                        (msg) =>
+                            (msg.sender === currentUser && msg.receiver === selectedUser.name) ||
+                            (msg.sender === selectedUser.name && msg.receiver === currentUser)
+                    )
+                    .map((msg, index) => (
+                        <div
+                            key={index}
+                            className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"
+                                }`}
+                        >
+                            {msg.message}
+                        </div>
+                    )))}
         </div>
-    )
+    );
 }
 
-export default ChatBody
+export default ChatBody;

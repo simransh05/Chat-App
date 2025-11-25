@@ -5,7 +5,7 @@ import api from "../../utils/Api";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
-function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMessages, onChatDeleted }) {
+function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMessages, setSelectedUser }) {
     const [showMenu, setShowMenu] = useState(false);
 
     const users = useSelector((state) => state.user.users);
@@ -29,8 +29,8 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
         if (!confirm.isConfirmed) return;
 
         try {
+            console.log(currentUser.id , selectedUser.id)
             const res = await api.deleteChat(currentUser.id , selectedUser.id)
-            console.log(res.status)
 
             Swal.fire({
                 icon: "success",
@@ -40,7 +40,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
             });
 
             setMessages([]);         
-            onChatDeleted();         
+            setSelectedUser(null)         
 
         } catch (error) {
             Swal.fire({

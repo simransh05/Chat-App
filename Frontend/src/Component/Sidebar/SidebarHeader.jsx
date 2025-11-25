@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import AddProfilePic from '../ProfileModal/AddProfilePic';
 const base_url = import.meta.env.VITE_BASE_URL;
-function SidebarHeader({ currentUser, getInitials , setCurrentUser }) {
+function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
 

@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import AddContactButton from './AddContactButton';
 import api from "../../utils/Api";
 
-function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials ,setCurrentUser}) {
+function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials, setCurrentUser, normalizeMsg }) {
     const dispatch = useDispatch();
     const users = useSelector((state) => state.user.users);
     const contacts = useSelector((state) => state.contact.contact);
@@ -24,28 +24,27 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshContacts = [...contacts];
             const freshUsers = [...users];
 
-            const userExists = freshUsers.some(u => u.name === name);
+            const userExists = freshUsers.find(u => u.name === name);
+            console.log("1", userExists)
 
             const contactEntry = freshContacts.find(c => c.name === name);
-
+            console.log("2", freshUsers)
             const nextSelected = {
-                id :userExists.id || contactEntry.id,
+                id: userExists?._id || contactEntry?._id || userExists?.id || contactEntry?.id || '',
                 name,
                 email,
                 existsInUserDB: userExists,
                 inviteSent: contactEntry?.inviteSent === true
             };
             setSelectedUser(nextSelected);
-            if (userExists) {
-                const res = await api.getHistory(currentUser.name, name);
 
-                const formatted = res.data.map(m => ({
-                    sender: m.sender.name,
-                    receiver: m.receiver.name,
-                    message: m.content
-                }));
-
-                setMessages(formatted);
+            if (userExists && nextSelected?.id) {
+                const res = await api.getHistory(currentUser.id, nextSelected?.id);
+                console.log("res.data", res.data)
+                setMessages((prev) => {
+                    const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
+                    return [...prev, ...newMessages];
+                })
             }
         }
         catch (err) {

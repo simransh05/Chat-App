@@ -17,9 +17,9 @@ const api = {
     userFetch: async (currentUser) => {
         return await axios.get(`${base_url}/users?name=${currentUser}`)
     },
-    getHistory: async (currentUser, name) => {
+    getHistory: async (currentUser, selectedUser) => {
         return await axios.get(
-            `${base_url}/history?user1=${currentUser}&user2=${name}`
+            `${base_url}/history?user1=${currentUser}&user2=${selectedUser}`
         );
     },
     postInvite: async (sendData) => {
@@ -35,7 +35,7 @@ const api = {
         return await axios.put(`${base_url}/update-name`, data);
     },
     deleteChat :async (currentUser, selectedUser) => {
-        await axios.delete(`/delete/${currentUser}/${selectedUser}`);
+        await axios.delete(`${base_url}/delete/${currentUser}/${selectedUser}`);
     }
 }
 

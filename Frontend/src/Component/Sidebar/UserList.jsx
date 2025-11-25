@@ -23,7 +23,7 @@ function UserList({
                         recentChats.map((chat, index) => (
                             <li
                                 key={index}
-                                className={`user-item ${selectedUser.name === chat.name ? "active-user" : ""
+                                className={`user-item ${selectedUser?.name === chat.name ? "active-user" : ""
                                     }`}
                                 onClick={() => handleUserClick(chat.name, chat.email)}
                             >
@@ -57,7 +57,7 @@ function UserList({
                         contacts.map((c, index) => (
                             <li
                                 key={index}
-                                className={`user-item ${selectedUser.name === c.name ? "active-user" : ""
+                                className={`user-item ${selectedUser?.name === c.name ? "active-user" : ""
                                     }`}
                                 onClick={() => handleUserClick(c.name, c.email)}
                             >

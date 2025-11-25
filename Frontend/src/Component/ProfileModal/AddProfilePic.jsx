@@ -22,45 +22,39 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
         setPreview(URL.createObjectURL(selected));
     };
 
-    const updateName = async () => {
-        if (newName === currentUser.name || newName.trim() === "") {
-            setEditName(false);
-            return;
-        }
+    const handleUpdate = async () => {
+        const info = JSON.parse(localStorage.getItem("login-info"));
+        let updatedUser = { ...currentUser };
         try {
-            const info = JSON.parse(localStorage.getItem("login-info"));
+            if (newName.trim() !== "" && newName !== currentUser.name) {
+                const res = await api.updateName({
+                    userId: info.user.id,
+                    name: newName
+                });
+                updatedUser.name = newName;
+                info.user.name = newName;
+            }
+            if (file) {
+                const form = new FormData();
+                form.append("ProfilePic", file);
+                form.append("userId", info.user.id);
 
-            const res = await api.updateName({
-                userId: info.user.id,
-                name: newName
-            });
-
-            info.user.name = newName;
+                const res = await api.uploadProfile(form);
+                updatedUser.ProfilePic = res.data.ProfilePic;
+                info.user.ProfilePic = res.data.ProfilePic;
+                setPreview(res.data.ProfilePic);
+                onUpload(res.data.ProfilePic);
+            }
             localStorage.setItem("login-info", JSON.stringify(info));
+            setCurrentUser(updatedUser);
+            close();
 
-            setCurrentUser({ ...currentUser, name: newName })
-
-            setEditName(false);
         } catch (err) {
             console.log(err);
-            alert("Could not update name");
+            alert("Could not update profile info");
         }
     };
 
-
-    const uploadFile = async (file) => {
-        const info = JSON.parse(localStorage.getItem("login-info"));
-        const form = new FormData(); // for sending the files to the backend
-        form.append("ProfilePic", file);
-        form.append("userId", info.user.id);
-        const res = await api.uploadProfile(form);
-        console.log(res.data.ProfilePic)
-        info.user.ProfilePic = res.data.ProfilePic;
-        localStorage.setItem("login-info", JSON.stringify(info));
-        setPreview(res.data.ProfilePic);
-        onUpload(res.data.ProfilePic);
-        close();
-    };
 
 
     return (
@@ -86,7 +80,6 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
                         autoFocus
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
-                        onBlur={updateName}
                         style={{
                             border: "1px solid #ccc",
                             padding: "5px 8px",
@@ -144,8 +137,8 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
                     <Button variant="outlined" onClick={close} sx={{ textTransform: "none" }}>
                         Cancel
                     </Button>
-                    <Button variant="contained" disabled={!file} onClick={() => uploadFile(file)} sx={{ textTransform: "none" }}>
-                        {currentUser.ProfilePic ? "Update" : "Upload"}
+                    <Button variant="contained" onClick={handleUpdate} sx={{ textTransform: "none" }}>
+                        Update
                     </Button>
                 </Stack>
             </Box>

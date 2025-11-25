@@ -69,20 +69,23 @@ async function getAllUsers(req, res) {
 async function getHistory(req, res) {
   const { user1, user2 } = req.query;
   try {
-    const userA = await User.findOne({ name: user1 });
-    const userB = await User.findOne({ name: user2 });
+    // console.log(user1, user2);
+    const userA = await User.findById(user1);
+    const userB = await User.findById(user2);
+    // console.log('user', userA, userB)
     if (!userA || !userB) return res.status(404).json({ message: "User not found" });
 
     const messages = await Message.find({
       $or: [
-        { sender: userA._id, receiver: userB._id },
-        { sender: userB._id, receiver: userA._id }
-      ], deletedBy: { $ne: user1 }
+        { sender: user1, receiver: user2 },
+        { sender: user2, receiver: user1 }
+      ],
+      deletedBy: { $nin: [user1] }
     })
-      .sort({ createdAt: 1 })
-      .populate("sender", "name")
-      .populate("receiver", "name");
-
+      .populate("sender receiver", "name email")
+      .sort({ timestamp: 1 });
+    // console.log();
+    console.log("user messages",messages);
     res.json(messages);
   } catch (err) {
     // console.error("Error fetching chat history:", err);
@@ -242,16 +245,16 @@ async function updateName(req, res) {
 
 async function deleteChat(req, res) {
   const { user1, user2 } = req.params;
-  console.log(user1,user2);
+
   try {
     await Message.updateMany(
       {
         $or: [
-          { senderId: user1, receiverId: user2 },
-          { senderId: user2, receiverId: user1 },
+          { sender: user1, receiver: user2 },
+          { sender: user2, receiver: user1 }
         ]
       },
-      { $addToSet: { deletedBy: user1 } }   // prevents duplicate entries
+      { $addToSet: { deletedBy: user1 } }
     );
 
     res.json({ success: true, message: "Chat deleted for you" });
