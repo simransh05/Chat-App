@@ -267,35 +267,18 @@
   padding: 12px;
 }
 
-
 .name {
   color: black;
 }
 
-.menu button {
-  float: right;
-  border: none;
-  border-radius: 4px;
-
+.chat-header,
+.heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 10px 15px; 
 }
 
-.menu-options {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: 0;
-  top: 35px;
-}
-
-.menu-options button {
-  padding: 10px 16px;
-  background-color: white;
-  color: gray;
-  border: 1px solid gold;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: small;
-}
 
 .chat-body {
   flex: 1;

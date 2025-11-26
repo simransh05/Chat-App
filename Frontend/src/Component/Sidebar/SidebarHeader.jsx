@@ -1,12 +1,23 @@
-import React, { useState } from 'react'
-import { FiLogOut } from "react-icons/fi";
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import AddProfilePic from '../ProfileModal/AddProfilePic';
+import {
+    Menu, MenuItem, IconButton,
+} from "@mui/material";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ResetPasswordModal from '../ProfileModal/ResetPasswordModal';
+
 const base_url = import.meta.env.VITE_BASE_URL;
+
 function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const menuOpen = Boolean(anchorEl);
+    const [openPassModal, setOpenPassModal] = useState(false);
+    const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
+    const handleMenuClose = () => setAnchorEl(null);
 
     const logout = () => {
         Swal.fire({
@@ -16,6 +27,7 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
             showCancelButton: true,
             confirmButtonText: "Yes",
             cancelButtonText: "No",
+            reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
                 localStorage.clear();
@@ -27,27 +39,25 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
     const upload = (newPic) => {
         const info = JSON.parse(localStorage.getItem("login-info"));
         info.user.ProfilePic = newPic;
-        console.log(info.user.ProfilePic)
         localStorage.setItem("login-info", JSON.stringify(info));
-        console.log(localStorage.getItem('login-info'))
+
         currentUser.ProfilePic = newPic;
-        console.log(currentUser.ProfilePic)
     };
 
     return (
         <div className="heading">
             <button className="profile-avatar" onClick={() => setShowModal(true)}>
-                {
-                    currentUser.ProfilePic ? (
-                        <img
-                            src={`${base_url}${currentUser.ProfilePic}`}
-                            alt="profile"
-                            className="avatar-img"
-                        />
-                    ) : (
-                        getInitials(currentUser.name)
-                    )}
+                {currentUser.ProfilePic ? (
+                    <img
+                        src={`${base_url}${currentUser.ProfilePic}`}
+                        alt="profile"
+                        className="avatar-img"
+                    />
+                ) : (
+                    getInitials(currentUser.name)
+                )}
             </button>
+
             {showModal && (
                 <AddProfilePic
                     open={showModal}
@@ -57,12 +67,28 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
                     onUpload={(pic) => upload(pic)}
                 />
             )}
-            <div className='username'>
-                {currentUser.name}
-            </div>
-            <FiLogOut onClick={logout} className="logout-icon" />
+
+            <div className='username'>{currentUser.name}</div>
+
+            <IconButton onClick={handleMenuClick}>
+                <MoreVertIcon />
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
+                <MenuItem onClick={() => { setOpenPassModal(true); handleMenuClose(); }}>
+                    Reset Password
+                </MenuItem>
+
+                <MenuItem onClick={() => { logout(); handleMenuClose(); }}>
+                    Logout
+                </MenuItem>
+            </Menu>
+            <ResetPasswordModal
+                open={openPassModal}
+                onClose={() => setOpenPassModal(false)}
+                currentUser={currentUser}
+            />
         </div>
-    )
+    );
 }
 
-export default SidebarHeader
+export default SidebarHeader;

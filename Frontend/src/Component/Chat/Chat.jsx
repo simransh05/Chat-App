@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import "./Chat.css";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
 import { jwtDecode } from "jwt-decode";
-const socket = io(`${base_url}`);
+const socket = io(base_url);
 import { fetchContacts } from "../../Slices/contactSlice";
 import { fetchRecentChats } from "../../Slices/recentSlice";
-import { fetchUsers } from "../../Slices/userSlice";
 import api from "../../utils/Api";
 import SideBar from "../Sidebar/SideBar";
 import ChatHeader from "./ChatHeader";
@@ -34,19 +33,23 @@ function Chat() {
   const [FontSize, setFontSize] = useState("normal");
 
   useEffect(() => {
-    dispatch(fetchContacts(currentUser.name));
-    dispatch(fetchRecentChats(currentUser.name));
+    dispatch(fetchContacts());
+    dispatch(fetchRecentChats());
   }, [currentUser.name]);
 
   const normalizeMsg = (msg) => {
     if (!msg) return null;
 
+    const senderName = typeof msg.sender === 'string' ? msg.sender : msg.sender?.name || "";
+    const receiverName = typeof msg.receiver === 'string' ? msg.receiver : msg.receiver?.name || "";
+
     return {
-      message: msg?.message ||msg?.content ||  "",
-      sender: msg?.sender?.name || "",   
-      receiver: msg?.receiver?.name || ""
+      message: msg.message || msg.content || "",
+      sender: senderName,
+      receiver: receiverName
     };
   };
+
 
   useEffect(() => {
     const token = localStorage.getItem("login-info");
@@ -64,9 +67,9 @@ function Chat() {
 
   useEffect(() => {
     if (currentUser.name) {
-      socket.emit("register", currentUser.name);
+      socket.emit("register", currentUser.id);
     }
-  }, [currentUser.name]);
+  }, [currentUser.id]);
 
   const handleInvite = async (email) => {
     try {
@@ -75,7 +78,7 @@ function Chat() {
       const sendData = { senderId: id, email }
 
       const res = await api.postInvite(sendData);
-      dispatch(fetchContacts(currentUser.name));
+      dispatch(fetchContacts());
       setSelectedUser((prev) => ({ ...prev, inviteSent: true }));
 
     } catch (err) {
@@ -84,13 +87,15 @@ function Chat() {
   };
 
   useEffect(() => {
+    console.log("receive")
     socket.on("receive_message", (data) => {
+      const newData = normalizeMsg(data);
 
-      setMessages(prev => [...prev, normalizeMsg(data)]);
+      setMessages(prev => [...prev, newData]);
     });
 
     return () => socket.off("receive_message");
-  }, []);
+  }, [messages]);
 
   const handleSend = (e) => {
     e.preventDefault();

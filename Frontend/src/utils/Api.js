@@ -36,6 +36,9 @@ const api = {
     },
     deleteChat :async (currentUser, selectedUser) => {
         await axios.delete(`${base_url}/delete/${currentUser}/${selectedUser}`);
+    },
+    resetPassword : async (payload) =>{
+        return await axios.put(`${base_url}/reset-password`, payload);
     }
 }
 

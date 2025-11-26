@@ -27,5 +27,6 @@ router.put("/update-name", controller.updateName);
 
 router.delete("/delete/:user1/:user2", controller.deleteChat);
 
+router.put("/reset-password" ,controller.resetPassword);
 
 module.exports = router;

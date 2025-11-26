@@ -34,8 +34,8 @@ const users = {};
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("register", (name) => {
-    users[name] = socket.id;
+  socket.on("register", (id) => {
+    users[id] = socket.id;
   });
 
   socket.on("send_message", async (data, callback) => {
@@ -53,19 +53,13 @@ io.on("connection", (socket) => {
         content: message,
       });
       await newMessage.save();
-      console.log("messages", newMessage)
       const receiverSocketId = users[receiverId];
       await newMessage.populate([
         { path: "sender", select: "name email" },
         { path: "receiver", select: "name email" }
       ]);
-      console.log("after save", newMessage)
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit("receive_message", {
-          sender: newMessage.sender.name,
-          receiver: newMessage.receiver.name,
-          message: newMessage.content
-        });
+        io.to(receiverSocketId).emit("receive_message", newMessage);
       }
       callback({ status: "ok" });
     } catch (error) {

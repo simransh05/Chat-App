@@ -41,10 +41,8 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             if (userExists && nextSelected?.id) {
                 const res = await api.getHistory(currentUser.id, nextSelected?.id);
                 console.log("res.data", res.data)
-                setMessages((prev) => {
-                    const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
-                    return [...prev, ...newMessages];
-                })
+                const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
+                setMessages(newMessages);
             }
         }
         catch (err) {
@@ -56,13 +54,13 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
         const handler = setTimeout(() => {
             const normalizeUser = (u) => ({
                 name: u.name?.trim(),
-                email: u.email || "",
+                email: u?.email || "",
                 id: u._id || u.id || null,
             });
 
             const merged = [...recentChats, ...contacts].map(normalizeUser);
             const uniqueUsers = Array.from(
-                new Map(merged.map((u) => [u.name.toLowerCase(), u])).values()
+                new Map(merged.filter(u => u && u.name).map((u) => [u.name.toLowerCase(), u])).values()
             );
 
             if (searchName.trim() === "") {

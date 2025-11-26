@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../utils/Api";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-
 export const fetchUsers = createAsyncThunk("user/fetchUsers", async (currentUser) => {
     const res = await api.userFetch(currentUser.name);
     console.log('using backend')

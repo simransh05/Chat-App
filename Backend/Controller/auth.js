@@ -85,7 +85,7 @@ async function getHistory(req, res) {
       .populate("sender receiver", "name email")
       .sort({ timestamp: 1 });
     // console.log();
-    console.log("user messages",messages);
+    // console.log("user messages", messages);
     res.json(messages);
   } catch (err) {
     // console.error("Error fetching chat history:", err);
@@ -97,32 +97,47 @@ async function postContact(req, res) {
   const { name, email, id } = req.body;
 
   try {
-    if (!name || !email) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!email || !name) {
+      return res.status(400).json({ message: "Name & Email are required" });
     }
 
-    const alreadyUser = await Contact.findOne({ email });
-    if (alreadyUser) {
+    // Check duplicate contact for this user
+    const duplicate = await Contact.findOne({ userId: id, email });
+    if (duplicate) {
       return res.status(200).json({ message: "Contact already exists" });
     }
+
+    // Check if email belongs to a registered user
     const userPresent = await User.findOne({ email });
 
-    const newContact = new Contact({
-      name,
-      email,
-      userId: id,
-      inviteSent: false,
-      contactId: userPresent ? userPresent._id : null
-    });
+    let newContact;
+
+    if (userPresent) {
+      newContact = new Contact({
+        userId: id,
+        inviteSent: false,
+        contactId: userPresent._id,  
+        name: userPresent.name,      
+        email: userPresent.email
+      });
+    } else {
+      newContact = new Contact({
+        userId: id,
+        inviteSent: false,
+        contactId: null,
+        name,
+        email
+      });
+    }
 
     await newContact.save();
-    if (!userPresent) {
-      newContact.contactId = newContact._id;
-      await newContact.save();
-    }
-    res.status(201).json({ message: "Successfully added", contact: newContact });
+
+    res.status(201).json({
+      message: "Contact added",
+      contact: newContact
+    });
+
   } catch (err) {
-    // console.error(err.message);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -131,20 +146,20 @@ async function getContact(req, res) {
   try {
     const userId = req.params.id;
 
-    const contacts = await Contact.find({ userId }).populate("contactId", "ProfilePic");
-    // console.log(contacts)
+    const contacts = await Contact.find({ userId })
+      .populate("contactId", "name email ProfilePic");
+
     const result = contacts.map(c => ({
       userId,
       id: c._id,
-      name: c.name,
-      email: c.email,
-      inviteSent: c.inviteSent,
-      createdAt: c.createdAt,
-      ProfilePic: c.contactId?.ProfilePic || "",
+      name: c.contactId?.name || c.name,
+      email: c.contactId?.email || c.email,
+      ProfilePic: c.contactId?.ProfilePic || null
     }));
+
     res.json(result);
+
   } catch (err) {
-    // console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -256,6 +271,14 @@ async function deleteChat(req, res) {
       },
       { $addToSet: { deletedBy: user1 } }
     );
+    await Message.deleteMany({
+      $or: [
+        { sender: user1, receiver: user2 },
+        { sender: user2, receiver: user1 }
+      ]
+    },
+      { deletedBy: { $all: [user1, user2] } }
+    )
 
     res.json({ success: true, message: "Chat deleted for you" });
   } catch (error) {
@@ -264,4 +287,27 @@ async function deleteChat(req, res) {
   }
 }
 
-module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat };
+async function resetPassword(req, res) {
+  try {
+    const { userId, oldPass, newPass } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPass, user.password); // plain vs hashed
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+    const hashedPass = await bcrypt.hash(newPass, 10);
+    user.password = hashedPass;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat, resetPassword };

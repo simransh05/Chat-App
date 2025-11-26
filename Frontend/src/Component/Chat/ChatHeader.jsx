@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import api from "../../utils/Api";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
 function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMessages, setSelectedUser }) {
-    const [showMenu, setShowMenu] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
 
     const users = useSelector((state) => state.user.users);
 
@@ -14,8 +19,16 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
         ? users.find((u) => u.email === selectedUser.email)
         : null;
 
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
     const handleDeleteChat = async () => {
-        setShowMenu(false);
+        handleMenuClose();
 
         const confirm = await Swal.fire({
             title: "Delete Chat?",
@@ -24,13 +37,13 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
             showCancelButton: true,
             confirmButtonText: "Yes, delete",
             cancelButtonText: "Cancel",
+            reverseButtons: true,
         });
 
         if (!confirm.isConfirmed) return;
 
         try {
-            console.log(currentUser.id , selectedUser.id)
-            const res = await api.deleteChat(currentUser.id , selectedUser.id)
+            const res = await api.deleteChat(currentUser.id, selectedUser.id);
 
             Swal.fire({
                 icon: "success",
@@ -39,8 +52,8 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 showConfirmButton: false,
             });
 
-            setMessages([]);         
-            setSelectedUser(null)         
+            setMessages([]);
+            setSelectedUser(null);
 
         } catch (error) {
             Swal.fire({
@@ -70,24 +83,41 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 </>
             )}
 
-            <div className="menu">
-                <button onClick={() => setShowMenu(!showMenu)}>⋮</button>
+            <IconButton onClick={handleMenuOpen}
+                size="small">
+                <MoreVertIcon />
+            </IconButton>
 
-                {showMenu && (
-                    <div className="menu-options">
-                        <button onClick={() => setFontSize("small")}>Small</button>
-                        <button onClick={() => setFontSize("normal")}>Normal</button>
-                        <button onClick={() => setFontSize("large")}>Large</button>
+            <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+            >
+                <MenuItem onClick={() => { setFontSize("small"); handleMenuClose(); }}>
+                    Small
+                </MenuItem>
+                <MenuItem onClick={() => { setFontSize("normal"); handleMenuClose(); }}>
+                    Normal
+                </MenuItem>
+                <MenuItem onClick={() => { setFontSize("large"); handleMenuClose(); }}>
+                    Large
+                </MenuItem>
 
-                        <button
-                            style={{ color: "red", marginTop: "6px" }}
-                            onClick={handleDeleteChat}
-                        >
-                            Delete Chat
-                        </button>
-                    </div>
-                )}
-            </div>
+                <MenuItem
+                    onClick={handleDeleteChat}
+                    sx={{ color: "red", fontWeight: "bold" }}
+                >
+                    Delete Chat
+                </MenuItem>
+            </Menu>
         </div>
     );
 }
