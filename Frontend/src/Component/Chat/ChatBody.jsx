@@ -1,7 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
     const chatBodyRef = useRef(null);
+    const [showButton, setShowButton] = useState(false);
+
+    const scrollToBottom = () => {
+        const el = chatBodyRef.current;
+        if (el) {
+            el.scrollTo({
+                top: el.scrollHeight,
+                behavior: "smooth"
+            });
+        }
+    };
+
+    const handleScroll = () => {
+        const el = chatBodyRef.current;
+        if (!el) return;
+        const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+        setShowButton(!atBottom);
+    };
 
     useEffect(() => {
         if (chatBodyRef.current) {
@@ -22,8 +40,8 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
                 overflowY: "auto",
             }}
             ref={chatBodyRef}
+            onScroll={handleScroll} 
         >
-            {console.log('messages', messages)}
             {messages.length === 0 ? (
                 <div className="no-messages"></div>
             ) : (
@@ -36,12 +54,17 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
                     .map((msg, index) => (
                         <div
                             key={index}
-                            className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"
-                                }`}
+                            className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"}`}
                         >
                             {msg.message}
                         </div>
-                    )))}
+                    ))
+            )}
+            {showButton && (
+                <button className="scrollBtn" onClick={scrollToBottom}>
+                    ↓
+                </button>
+            )}
         </div>
     );
 }

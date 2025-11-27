@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import api from "../../utils/Api";
 
-const base_url = import.meta.env.VITE_BASE_URL;
 
 function AddContact({ open, onClose, onSuccess }) {
   const [data, setData] = useState({ name: "", email: "" });

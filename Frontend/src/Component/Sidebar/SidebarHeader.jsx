@@ -70,7 +70,10 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
 
             <div className='username'>{currentUser.name}</div>
 
-            <IconButton onClick={handleMenuClick}>
+            <IconButton onClick={handleMenuClick} sx={{
+                display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
+                minWidth: 'auto', maxWidth:'30px'
+            }}>
                 <MoreVertIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>

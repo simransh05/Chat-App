@@ -14,7 +14,7 @@ function AddContactButton({ currentUser, selectedBtn }) {
                     onClick={() => setShowAddContact(true)}
                     variant="contained"
                     color="primary"
-                    sx={{ m: 2, backgroundColor: "#00a884", minWidth: 0, width: "40px", height: "30px", borderRadius: "50%", fontSize: "24px", padding: "" }}
+                    sx={{ m: 2, backgroundColor: "#00a884", minWidth: 0, width: "56px", height: "56px", borderRadius: "50%", fontSize: "24px", padding: "0" }}
                     className="add-contact"
                 >
                     +

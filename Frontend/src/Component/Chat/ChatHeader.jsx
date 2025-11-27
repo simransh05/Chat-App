@@ -84,7 +84,10 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
             )}
 
             <IconButton onClick={handleMenuOpen}
-                size="small">
+                size="small" sx={{
+                    display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
+                    minWidth: 'auto',maxWidth:'30px'
+                }}>
                 <MoreVertIcon />
             </IconButton>
 
@@ -92,6 +95,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleMenuClose}
+                
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "right",

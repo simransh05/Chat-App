@@ -100,9 +100,21 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                     setSearchResults={setSearchResults}
                 />
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <Tabs value={selectedBtn} onChange={handleChange}>
-                        <Tab label="Recent Chat" value="recentChat" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" }, "@media (max-width:1100px)": { width: "40px" }, textTransform: "none" }} />
-                        <Tab label="My Contact" value="myContact" sx={{ width: '180px', "@media (max-width:600px)": { width: "30px" }, "@media (max-width:1100px)": { width: "40px" }, textTransform: "none" }} />
+                    <Tabs value={selectedBtn} onChange={handleChange} sx={{display:'flex' }}>
+                        <Tab label="Recent Chat" value="recentChat" sx={{
+                            width: '180px',
+                            "@media (max-width:1100px)": { width: "120px" },
+                            "@media (max-width:900px)": { width: "95px" },
+                            "@media (max-width:700px)": { width: "30px" },
+                            textTransform: "none"
+                        }} />
+                        <Tab label="My Contact" value="myContact" sx={{
+                            width: '180px',
+                            "@media (max-width:1100px)": { width: "120px" },
+                            "@media (max-width:900px)": { width: "95px" },
+                            "@media (max-width:700px)": { width: "30px" },
+                            textTransform: "none"
+                        }} />
                     </Tabs>
                 </Box>
             </div>
