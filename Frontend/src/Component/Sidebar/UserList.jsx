@@ -17,39 +17,44 @@ function UserList({
 
     return (
         <ul className="user-list">
-            {selectedBtn === "recentChat" ? (
-                <>
-                    {recentChats.length > 0 ? (
-                        recentChats.map((chat, index) => (
+            {selectedBtn === "recentChat" && (
+                recentChats.length > 0 ? (
+                    recentChats.map((chat, index) => {
+                        const userFromDB = users.find(u => u.email === chat.email);
+                        const displayName = chat.name || userFromDB?.name || "Unknown";
+                        const profilePic = chat.ProfilePic || userFromDB?.ProfilePic;
+
+                        return (
                             <li
                                 key={index}
-                                className={`user-item ${selectedUser?.name === chat.name ? "active-user" : ""
-                                    }`}
-                                onClick={() => handleUserClick(chat.name, chat.email)}
+                                className={`user-item ${selectedUser?.id === chat.id ? "active-user" : ""}`}
+                                onClick={() => handleUserClick(chat.id)}
                             >
                                 <div className="profile">
-                                    {chat.ProfilePic ? (
-                                        <img
-                                            src={`${base_url}${chat.ProfilePic}`}
-                                            alt={chat.name}
-                                            className="profile-pic"
-                                        />
+                                    {profilePic ? (
+                                        <img src={`${base_url}${profilePic}`} alt={displayName} className="profile-pic" />
                                     ) : (
-                                        <div className="initials">{getInitials(chat.name)}</div>
+                                        <div className="initials">{getInitials(displayName)}</div>
                                     )}
                                 </div>
 
                                 <div className="user-info">
-                                    <div className="user-name">{chat.name}</div>
-                                    <div className="user-email">{chat.email}</div>
+                                    {contacts.some(c => c.email === chat.email) ? (
+                                        <>
+                                            <div className="user-name">{displayName}</div>
+                                            <div className="user-email">{chat.email}</div>
+                                        </>
+                                    ) : (
+                                        <div className="user-email only-mail">{chat.email}</div>
+                                    )}
                                 </div>
                             </li>
-                        ))
-                    ) : (
-                        <div className="no-chat">No records found</div>
-                    )}
-                </>
-            ) : null}
+                        );
+                    })
+                ) : (
+                    <div className="no-chat">No records found</div>
+                )
+            )}
 
             {selectedBtn === "myContact" ? (
                 <>
@@ -57,9 +62,9 @@ function UserList({
                         contacts.map((c, index) => (
                             <li
                                 key={index}
-                                className={`user-item ${selectedUser?.name === c.name ? "active-user" : ""
+                                className={`user-item ${selectedUser?.id === c.id ? "active-user" : ""
                                     }`}
-                                onClick={() => handleUserClick(c.name, c.email)}
+                                onClick={() => handleUserClick(c.id)}
                             >
                                 <div className="profile">
                                     {users.find(u => u.email === c.email) ? (
@@ -73,7 +78,7 @@ function UserList({
                                             <div className="initials">{getInitials(c.name)}</div>
                                         )
                                     ) : (
-                                        <Avatar sx={{ backgroundColor: "#b0b3b8", boxShadow: "none", border: "none",outline:'none' }} />
+                                        <Avatar sx={{ backgroundColor: "#b0b3b8", boxShadow: "none", border: "none", outline: 'none' }} />
                                     )}
                                 </div>
 

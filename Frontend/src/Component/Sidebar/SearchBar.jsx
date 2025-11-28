@@ -19,7 +19,7 @@ function SearchBar({ handleUserClick, searchResults, searchName, setSearchName, 
                             key={user.id || user._id}
                             className="search-result-item"
                             onClick={() => {
-                                handleUserClick(user.name)
+                                handleUserClick(user.id||user._id)
                                 setSearchName("");
                                 setSearchResults([]);
                             }}

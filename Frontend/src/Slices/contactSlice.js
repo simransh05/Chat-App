@@ -7,7 +7,7 @@ export const fetchContacts = createAsyncThunk(
         const userData = JSON.parse(localStorage.getItem("login-info"));
         const id = userData?.user?.id;
         const res = await api.contract(id)
-        console.log('using backend')
+        console.log('using backend',res.data)
         return res.data;
     }
 );
