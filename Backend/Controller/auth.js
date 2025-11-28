@@ -101,13 +101,11 @@ async function postContact(req, res) {
       return res.status(400).json({ message: "Name & Email are required" });
     }
 
-    // Check duplicate contact for this user
     const duplicate = await Contact.findOne({ userId: id, email });
     if (duplicate) {
       return res.status(200).json({ message: "Contact already exists" });
     }
 
-    // Check if email belongs to a registered user
     const userPresent = await User.findOne({ email });
 
     let newContact;
@@ -116,8 +114,8 @@ async function postContact(req, res) {
       newContact = new Contact({
         userId: id,
         inviteSent: false,
-        contactId: userPresent._id,  
-        name: userPresent.name,      
+        contactId: userPresent._id,
+        name,
         email: userPresent.email
       });
     } else {
@@ -131,6 +129,7 @@ async function postContact(req, res) {
     }
 
     await newContact.save();
+    // console.log("post", newContact)
 
     res.status(201).json({
       message: "Contact added",
@@ -147,15 +146,17 @@ async function getContact(req, res) {
     const userId = req.params.id;
 
     const contacts = await Contact.find({ userId })
-      .populate("contactId", "name email ProfilePic");
+      .populate("contactId", "_id email ProfilePic");
 
     const result = contacts.map(c => ({
       userId,
-      id: c._id,
-      name: c.contactId?.name || c.name,
+      id: c.contactId?._id || c._id,
+      name: c.name,
       email: c.contactId?.email || c.email,
-      ProfilePic: c.contactId?.ProfilePic || null
+      ProfilePic: c.contactId?.ProfilePic || null,
+      inviteSent :c.inviteSent || false
     }));
+    // console.log("get", result)
 
     res.json(result);
 
@@ -165,22 +166,43 @@ async function getContact(req, res) {
 }
 
 async function getChat(req, res) {
-  const userId = req.params.id;
+
   try {
+    const userId = req.params.id;
     const chats = await Message.find({
       $or: [{ sender: userId }, { receiver: userId }]
-    }).populate("sender receiver", "name email ProfilePic");
-    const usersSet = new Set();
-    chats.forEach(c => {
-      if (c.sender._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.sender._id, name: c.sender.name, email: c.sender.email, ProfilePic: c.sender.ProfilePic }));
-      if (c.receiver._id.toString() !== userId) usersSet.add(JSON.stringify({ id: c.receiver._id, name: c.receiver.name, email: c.receiver.email, ProfilePic: c.receiver.ProfilePic }));
+    }).select("sender receiver");
+
+    const otherUserIds = new Set();
+
+    chats.forEach(msg => {
+      if (msg.sender.toString() !== userId) otherUserIds.add(msg.sender.toString());
+      if (msg.receiver.toString() !== userId) otherUserIds.add(msg.receiver.toString());
     });
 
-    const recentUsers = Array.from(usersSet).map(u => JSON.parse(u));
-    // console.log(recentUsers)
-    res.json(recentUsers);
+    const ids = [...otherUserIds];
+
+    if (ids.length === 0) return res.json([]);
+    const contacts = await Contact.find({
+      userId,
+      contactId: { $in: ids }
+    }).select("contactId name");
+
+    const contactMap = {};
+    contacts.forEach(c => {
+      contactMap[c.contactId.toString()] = c.name;
+    });
+    const users = await User.find({ _id: { $in: ids } })
+      .select("email ProfilePic");
+
+    const result = users.map(u => ({
+      id: u._id,
+      name: contactMap[u._id],
+      email: u.email,
+      ProfilePic: u.ProfilePic || null
+    }));
+    return res.json(result);
   } catch (err) {
-    // console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -272,13 +294,8 @@ async function deleteChat(req, res) {
       { $addToSet: { deletedBy: user1 } }
     );
     await Message.deleteMany({
-      $or: [
-        { sender: user1, receiver: user2 },
-        { sender: user2, receiver: user1 }
-      ]
-    },
-      { deletedBy: { $all: [user1, user2] } }
-    )
+      deletedBy: { $all: [user1, user2] }
+    })
 
     res.json({ success: true, message: "Chat deleted for you" });
   } catch (error) {
@@ -295,7 +312,7 @@ async function resetPassword(req, res) {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(oldPass, user.password); // plain vs hashed
+    const isMatch = await bcrypt.compare(oldPass, user.password); 
     if (!isMatch) {
       return res.status(400).json({ message: "Old password is incorrect" });
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./Chat.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
@@ -20,6 +20,8 @@ function Chat() {
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem("login-info"))?.user
   );
+
+  const contacts = useSelector((state) => state.contact.contact)
 
   const [selectedUser, setSelectedUser] = useState({
     id: "",
@@ -78,8 +80,8 @@ function Chat() {
       const sendData = { senderId: id, email }
 
       const res = await api.postInvite(sendData);
-      dispatch(fetchContacts());
-      setSelectedUser((prev) => ({ ...prev, inviteSent: true }));
+      dispatch(fetchContacts())
+      setSelectedUser(prev => ({ ...prev, inviteSent: true }));
 
     } catch (err) {
       console.error("Invite error:", err);
@@ -156,7 +158,7 @@ function Chat() {
         normalizeMsg={normalizeMsg} />
 
       <div className="chat-area">
-        {selectedUser?.name ? (
+        {selectedUser?.id ? (
           selectedUser.existsInUserDB ? (
             <>
               <ChatHeader

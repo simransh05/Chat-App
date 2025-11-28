@@ -21,6 +21,7 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const passwordRegex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,6 +39,11 @@ function Signup() {
 
     if (formData.password !== confirmPassword) {
       setError("Passwords do not match!");
+      return;
+    }
+
+    if(!passwordRegex.test(formData.password)){
+      alert('invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.');
       return;
     }
 

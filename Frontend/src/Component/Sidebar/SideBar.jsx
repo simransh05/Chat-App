@@ -19,15 +19,17 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
     useEffect(() => {
         dispatch(fetchUsers(currentUser))
     }, [currentUser])
-    const handleUserClick = async (name, email) => {
+    const handleUserClick = async (id) => {
         try {
             const freshContacts = [...contacts];
             const freshUsers = [...users];
 
-            const userExists = freshUsers.find(u => u.name === name);
+            const userExists = freshUsers.find(u => u.id === id);
             console.log("1", userExists)
 
-            const contactEntry = freshContacts.find(c => c.name === name);
+            const contactEntry = freshContacts.find(c => c.id === id);
+            const name = contactEntry?.name || userExists?.name || "";
+            const email = contactEntry?.email || userExists?.email || "";
             console.log("2", freshUsers)
             const nextSelected = {
                 id: userExists?._id || contactEntry?._id || userExists?.id || contactEntry?.id || '',
@@ -100,7 +102,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                     setSearchResults={setSearchResults}
                 />
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <Tabs value={selectedBtn} onChange={handleChange} sx={{display:'flex' }}>
+                    <Tabs value={selectedBtn} onChange={handleChange} sx={{ display: 'flex' }}>
                         <Tab label="Recent Chat" value="recentChat" sx={{
                             width: '180px',
                             "@media (max-width:1100px)": { width: "120px" },

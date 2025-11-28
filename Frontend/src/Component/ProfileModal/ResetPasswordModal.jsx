@@ -11,6 +11,7 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
     const [oldPass, setOldPass] = useState("");
     const [newPass, setNewPass] = useState("");
     const [confirmPass, setConfirmPass] = useState("");
+    const passwordRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,15}$");
 
     const [showOldPass, setShowOldPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
@@ -23,6 +24,17 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
 
         if (newPass !== confirmPass) {
             return Swal.fire("Error", "New Password & Confirm Password do not match", "error");
+        }
+
+        if(!passwordRegex.test(oldPass)){
+            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
+        }
+
+        if(!passwordRegex.test(newPass)){
+            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
+        }
+        if(!passwordRegex.test(confirmPass)){
+            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
         }
 
         try {

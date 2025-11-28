@@ -25,7 +25,7 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
         if (chatBodyRef.current) {
             chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
         }
-    }, [messages, selectedUser.name]);
+    }, [messages, selectedUser.id]);
 
     return (
         <div
