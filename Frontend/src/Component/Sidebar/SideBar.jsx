@@ -24,7 +24,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshContacts = [...contacts];
             const freshUsers = [...users];
 
-            const userExists = freshUsers.find(u => u.id === id);
+            const userExists =  freshUsers.find(u => u._id === id || u.id === id);
             console.log("1", userExists)
 
             const contactEntry = freshContacts.find(c => c.id === id);
@@ -40,9 +40,8 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             };
             setSelectedUser(nextSelected);
 
-            if (userExists && nextSelected?.id) {
+            if (nextSelected?.id) {
                 const res = await api.getHistory(currentUser.id, nextSelected?.id);
-                console.log("res.data", res.data)
                 const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
                 setMessages(newMessages);
             }
@@ -132,6 +131,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             <AddContactButton
                 selectedBtn={selectedBtn}
                 currentUser={currentUser}
+                setSelectedUser={setSelectedUser}
             />
         </div>
     )

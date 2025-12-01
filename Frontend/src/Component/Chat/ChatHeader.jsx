@@ -1,23 +1,31 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import api from "../../utils/Api";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { fetchRecentChats } from "../../Slices/recentSlice";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
 function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMessages, setSelectedUser }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const dispatch = useDispatch()
 
     const users = useSelector((state) => state.user.users);
+    const userFromDB = users.find(u => u.email === selectedUser.email);
+    const profilePic = userFromDB?.ProfilePic;
+
+    const contacts = useSelector((state) => state.contact.contact);
+    const userContact = contacts.find((u) => u.email === selectedUser.email)||null
 
     const fullUser = selectedUser
         ? users.find((u) => u.email === selectedUser.email)
         : null;
+
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -51,7 +59,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 timer: 1200,
                 showConfirmButton: false,
             });
-
+            dispatch(fetchRecentChats());
             setMessages([]);
             setSelectedUser(null);
 
@@ -68,9 +76,9 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
         <div className="chat-header">
             {fullUser && (
                 <>
-                    {fullUser.ProfilePic ? (
+                    {profilePic ? (
                         <img
-                            src={`${base_url}${fullUser.ProfilePic}`}
+                            src={`${base_url}${profilePic}`}
                             alt="profile"
                             className="header-avatar"
                         />
@@ -79,14 +87,14 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                             {getInitials(fullUser.name)}
                         </div>
                     )}
-                    <div className="name">{selectedUser.name}</div>
+                    <div className="name">{userContact ? userContact.name : selectedUser.name}</div>
                 </>
             )}
 
             <IconButton onClick={handleMenuOpen}
                 size="small" sx={{
                     display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
-                    minWidth: 'auto',maxWidth:'30px'
+                    minWidth: 'auto', maxWidth: '30px'
                 }}>
                 <MoreVertIcon />
             </IconButton>
@@ -95,7 +103,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleMenuClose}
-                
+
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "right",

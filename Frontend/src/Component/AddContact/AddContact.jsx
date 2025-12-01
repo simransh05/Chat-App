@@ -8,10 +8,13 @@ import {
   Button,
 } from "@mui/material";
 import api from "../../utils/Api";
+import { useDispatch } from "react-redux";
+import { fetchRecentChats } from "../../Slices/recentSlice";
 
 
 function AddContact({ open, onClose, onSuccess }) {
   const [data, setData] = useState({ name: "", email: "" });
+  const dispatch = useDispatch()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +29,7 @@ function AddContact({ open, onClose, onSuccess }) {
       const id = login.user.id;
       const allData = { ...data, id };
       await api.postContact(allData);
+      dispatch(fetchRecentChats())
       if (onSuccess) onSuccess(allData);
       onClose();
     } catch (error) {
@@ -36,7 +40,7 @@ function AddContact({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Add New Contact</DialogTitle>
+      <DialogTitle sx={{display:'flex' , justifyContent:'center'}}>Add New Contact</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <TextField

@@ -11,9 +11,9 @@ function UserList({
     const contacts = useSelector((state) => state.contact.contact);
     const recentChats = useSelector((state) => state.recent.chat);
     const users = useSelector((state) => state.user.users);
-    console.log("contacts", contacts);
-    console.log("recents", recentChats);
-    console.log("users", users)
+    // console.log("contacts", contacts);
+    // console.log("recents", recentChats);
+    // console.log("users", users)
 
     return (
         <ul className="user-list">

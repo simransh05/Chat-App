@@ -22,6 +22,10 @@ async function signup(req, res) {
     });
 
     await newUser.save();
+    await Contact.updateMany(
+      { email: newUser.email },
+      { $set: { contactId: newUser._id } }
+    );
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     // console.error("Signup error:", error);
@@ -59,7 +63,8 @@ async function login(req, res) {
 async function getAllUsers(req, res) {
   try {
     const { name } = req.query;
-    const users = await User.find({ name: { $ne: name } }).select("name email");
+    const users = await User.find({ name: { $ne: name } });
+    // console.log(users);
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -154,7 +159,7 @@ async function getContact(req, res) {
       name: c.name,
       email: c.contactId?.email || c.email,
       ProfilePic: c.contactId?.ProfilePic || null,
-      inviteSent :c.inviteSent || false
+      inviteSent: c.inviteSent || false
     }));
     // console.log("get", result)
 
@@ -192,15 +197,18 @@ async function getChat(req, res) {
     contacts.forEach(c => {
       contactMap[c.contactId.toString()] = c.name;
     });
+    // console.log(contactMap)
     const users = await User.find({ _id: { $in: ids } })
       .select("email ProfilePic");
 
+      // console.log(users)
     const result = users.map(u => ({
       id: u._id,
       name: contactMap[u._id],
       email: u.email,
       ProfilePic: u.ProfilePic || null
     }));
+    // console.log(result)
     return res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -312,7 +320,7 @@ async function resetPassword(req, res) {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(oldPass, user.password); 
+    const isMatch = await bcrypt.compare(oldPass, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Old password is incorrect" });
     }
