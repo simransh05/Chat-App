@@ -48,13 +48,13 @@ function ChatBody({ messages, selectedUser, FontSize, currentUser }) {
                 messages
                     .filter(
                         (msg) =>
-                            (msg.sender === currentUser && msg.receiver === selectedUser.name) ||
-                            (msg.sender === selectedUser.name && msg.receiver === currentUser)
+                            (msg.senderId === currentUser && msg.receiverId === selectedUser.id) ||
+                            (msg.senderId === selectedUser.id && msg.receiverId === currentUser)
                     )
                     .map((msg, index) => (
                         <div
                             key={index}
-                            className={`chat-bubble ${msg.sender === currentUser ? "sent" : "received"}`}
+                            className={`chat-bubble ${msg.senderId === currentUser ? "sent" : "received"}`}
                         >
                             {msg.message}
                         </div>

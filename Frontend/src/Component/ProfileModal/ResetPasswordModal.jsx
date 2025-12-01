@@ -16,6 +16,26 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
     const [showOldPass, setShowOldPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
     const [showConfirmPass, setShowConfirmPass] = useState(false);
+    const [passwordRules, setPasswordRules] = useState({
+        lower: false,
+        upper: false,
+        number: false,
+        length: false,
+        symbol: false,
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "password") {
+            setPasswordRules({
+                lower: /[a-z]/.test(value),
+                upper: /[A-Z]/.test(value),
+                number: /[0-9]/.test(value),
+                length: value.length >= 8,
+                symbol: /[\W_]/.test(value),
+            });
+        }
+    }
 
     const handleResetPassword = async () => {
         if (!oldPass.trim() || !newPass.trim() || !confirmPass.trim()) {
@@ -26,15 +46,15 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
             return Swal.fire("Error", "New Password & Confirm Password do not match", "error");
         }
 
-        if(!passwordRegex.test(oldPass)){
-            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
+        if (!passwordRegex.test(oldPass)) {
+            return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
 
-        if(!passwordRegex.test(newPass)){
-            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
+        if (!passwordRegex.test(newPass)) {
+            return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
-        if(!passwordRegex.test(confirmPass)){
-            return Swal.fire("Error",'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.','error')
+        if (!passwordRegex.test(confirmPass)) {
+            return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
 
         try {
@@ -93,6 +113,24 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
+                <h4>Password must contains :- </h4>
+                <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+                    <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+                    </li>
+                    <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+                    </li>
+                    <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.number ? "✔" : "✖"} At least one number
+                    </li>
+                    <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+                    </li>
+                    <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+                    </li>
+                </ul>
 
                 <TextField
                     label="New Password"
@@ -110,6 +148,24 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
+                <h4>Password must contains :- </h4>
+                <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+                    <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+                    </li>
+                    <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+                    </li>
+                    <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.number ? "✔" : "✖"} At least one number
+                    </li>
+                    <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+                    </li>
+                    <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+                    </li>
+                </ul>
 
                 <TextField
                     label="Confirm Password"
@@ -127,6 +183,24 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
+                <h4>Password must contains :- </h4>
+                <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+                    <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+                    </li>
+                    <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+                    </li>
+                    <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.number ? "✔" : "✖"} At least one number
+                    </li>
+                    <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+                    </li>
+                    <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+                        {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+                    </li>
+                </ul>
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: "space-between", mt: 1 }}>

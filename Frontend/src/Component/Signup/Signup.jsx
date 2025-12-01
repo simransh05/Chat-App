@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useSelector } from "react-redux";
 
 function Signup() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -21,11 +22,29 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
-  const passwordRegex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
+  const users = useSelector((state) => state.user.users);
+  const [passwordRules, setPasswordRules] = useState({
+    lower: false,
+    upper: false,
+    number: false,
+    length: false,
+    symbol: false,
+  });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     setError("");
+    if (name === "password") {
+      setPasswordRules({
+        lower: /[a-z]/.test(value),
+        upper: /[A-Z]/.test(value),
+        number: /[0-9]/.test(value),
+        length: value.length >= 8,
+        symbol: /[\W_]/.test(value),
+      });
+    }
   };
 
   function isValidEmail(email) {
@@ -42,7 +61,7 @@ function Signup() {
       return;
     }
 
-    if(!passwordRegex.test(formData.password)){
+    if (!passwordRegex.test(formData.password)) {
       alert('invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.');
       return;
     }
@@ -52,6 +71,10 @@ function Signup() {
         alert("Please enter a valid email!");
         return;
       }
+      if (users.find(u => u.email == formData.email)) {
+        return alert('Email already exists.')
+      }
+
       await api.createUser(formData);
       navigate("/login");
     } catch (err) {
@@ -110,6 +133,25 @@ function Signup() {
               ),
             }}
           />
+          <h4>Password must contains :- </h4>
+          <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+            <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+            </li>
+            <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+            </li>
+            <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.number ? "✔" : "✖"} At least one number
+            </li>
+            <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+            </li>
+            <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+            </li>
+          </ul>
+
 
           <TextField
             fullWidth
@@ -128,6 +170,24 @@ function Signup() {
               ),
             }}
           />
+          <h4>Password must contains :- </h4>
+          <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+            <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+            </li>
+            <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+            </li>
+            <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.number ? "✔" : "✖"} At least one number
+            </li>
+            <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+            </li>
+            <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+            </li>
+          </ul>
 
           {error && (
             <Typography color="error" mt={1}>

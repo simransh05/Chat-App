@@ -18,9 +18,27 @@ function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [passwordRules, setPasswordRules] = useState({
+    lower: false,
+    upper: false,
+    number: false,
+    length: false,
+    symbol: false,
+  });
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "password") {
+      setPasswordRules({
+        lower: /[a-z]/.test(value),
+        upper: /[A-Z]/.test(value),
+        number: /[0-9]/.test(value),
+        length: value.length >= 8,
+        symbol: /[\W_]/.test(value),
+      });
+    }
+  }
 
   useEffect(() => {
     const alreadyUser = localStorage.getItem("login-info");
@@ -88,6 +106,24 @@ function Login() {
               ),
             }}
           />
+          <h4>Password must contains :- </h4>
+          <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
+            <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
+            </li>
+            <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
+            </li>
+            <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.number ? "✔" : "✖"} At least one number
+            </li>
+            <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
+            </li>
+            <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
+              {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
+            </li>
+          </ul>
 
           <Button
             fullWidth

@@ -35,25 +35,6 @@ function Chat() {
   const [FontSize, setFontSize] = useState("normal");
 
   useEffect(() => {
-    dispatch(fetchContacts());
-    dispatch(fetchRecentChats());
-  }, [currentUser.name]);
-
-  const normalizeMsg = (msg) => {
-    if (!msg) return null;
-
-    const senderName = typeof msg.sender === 'string' ? msg.sender : msg.sender?.name || "";
-    const receiverName = typeof msg.receiver === 'string' ? msg.receiver : msg.receiver?.name || "";
-
-    return {
-      message: msg.message || msg.content || "",
-      sender: senderName,
-      receiver: receiverName
-    };
-  };
-
-
-  useEffect(() => {
     const token = localStorage.getItem("login-info");
     if (token) {
       const decoded = jwtDecode(token);
@@ -66,6 +47,29 @@ function Chat() {
       navigate("/login");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+    dispatch(fetchRecentChats());
+  }, [currentUser.name]);
+
+  const normalizeMsg = (msg) => {
+    if (!msg) return null;
+
+    const senderId = msg.sender?._id || "";
+    const receiverId = msg.receiver?._id || "";
+
+    const senderName = msg.sender?.name || "";
+    const receiverName = msg.receiver?.name || "";
+
+    return {
+      message: msg.message || msg.content || "",
+      sender: senderName,
+      receiver: receiverName,
+      senderId,
+      receiverId
+    };
+  };
 
   useEffect(() => {
     if (currentUser.name) {
@@ -89,11 +93,11 @@ function Chat() {
   };
 
   useEffect(() => {
-    console.log("receive")
     socket.on("receive_message", (data) => {
       const newData = normalizeMsg(data);
 
       setMessages(prev => [...prev, newData]);
+      dispatch(fetchRecentChats());
     });
 
     return () => socket.off("receive_message");
@@ -108,20 +112,21 @@ function Chat() {
       receiverId: selectedUser.id,
       message,
     };
-    console.log(message)
 
     socket.emit("send_message", msgData, (res) => {
-      console.log(res.status === 'ok')
       if (res.status === 'ok') {
         setMessages(prev => [
           ...prev,
           {
             sender: currentUser.name,
             receiver: selectedUser.name,
-            message
+            message,
+            senderId: currentUser.id,
+            receiverId: selectedUser.id
           }
         ]);
         setMessage("");
+        dispatch(fetchRecentChats())
       } else {
         console.log(res.message);
       }
@@ -174,7 +179,7 @@ function Chat() {
                 messages={messages}
                 selectedUser={selectedUser}
                 FontSize={FontSize}
-                currentUser={currentUser.name} />
+                currentUser={currentUser.id} />
 
               <ChatFooter
                 handleSend={handleSend}
