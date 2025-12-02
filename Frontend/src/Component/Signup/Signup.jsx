@@ -170,24 +170,6 @@ function Signup() {
               ),
             }}
           />
-          <h4>Password must contains :- </h4>
-          <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
-            <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
-              {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
-            </li>
-            <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
-              {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
-            </li>
-            <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
-              {passwordRules.number ? "✔" : "✖"} At least one number
-            </li>
-            <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
-              {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
-            </li>
-            <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
-              {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
-            </li>
-          </ul>
 
           {error && (
             <Typography color="error" mt={1}>

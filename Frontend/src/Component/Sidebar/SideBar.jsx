@@ -7,6 +7,8 @@ import SidebarHeader from './SidebarHeader';
 import SearchBar from './SearchBar';
 import AddContactButton from './AddContactButton';
 import api from "../../utils/Api";
+import { fetchContacts } from "../../Slices/contactSlice";
+import { fetchRecentChats } from "../../Slices/recentSlice";
 
 function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getInitials, setCurrentUser, normalizeMsg }) {
     const dispatch = useDispatch();
@@ -24,13 +26,13 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshContacts = [...contacts];
             const freshUsers = [...users];
 
-            const userExists =  freshUsers.find(u => u._id === id || u.id === id);
-            console.log("1", userExists)
+            const userExists = freshUsers.find(u => u._id === id || u.id === id);
+            // console.log("1", userExists)
 
             const contactEntry = freshContacts.find(c => c.id === id);
             const name = contactEntry?.name || userExists?.name || "";
             const email = contactEntry?.email || userExists?.email || "";
-            console.log("2", freshUsers)
+            // console.log("2", freshUsers)
             const nextSelected = {
                 id: userExists?._id || contactEntry?._id || userExists?.id || contactEntry?.id || '',
                 name,
@@ -39,6 +41,9 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                 inviteSent: contactEntry?.inviteSent === true
             };
             setSelectedUser(nextSelected);
+            dispatch(fetchContacts());
+            dispatch(fetchRecentChats())
+            console.log('fetch')
 
             if (nextSelected?.id) {
                 const res = await api.getHistory(currentUser.id, nextSelected?.id);

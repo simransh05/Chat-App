@@ -26,6 +26,7 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setNewPass(value)
         if (name === "password") {
             setPasswordRules({
                 lower: /[a-z]/.test(value),
@@ -113,31 +114,14 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
-                <h4>Password must contains :- </h4>
-                <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
-                    <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
-                    </li>
-                    <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
-                    </li>
-                    <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.number ? "✔" : "✖"} At least one number
-                    </li>
-                    <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
-                    </li>
-                    <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
-                    </li>
-                </ul>
 
                 <TextField
                     label="New Password"
+                    name="password"
                     type={showNewPass ? "text" : "password"}
                     fullWidth
                     value={newPass}
-                    onChange={(e) => setNewPass(e.target.value)}
+                    onChange={handleChange}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
@@ -148,7 +132,7 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
-                <h4>Password must contains :- </h4>
+                <h4 style={{ padding: 0, margin: 0 }}>Password must contains :- </h4>
                 <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
                     <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
                         {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
@@ -183,24 +167,6 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
                         ),
                     }}
                 />
-                <h4>Password must contains :- </h4>
-                <ul style={{ fontSize: "13px", marginTop: "5px", paddingLeft: "15px" }}>
-                    <li style={{ color: passwordRules.lower ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.lower ? "✔" : "✖"} At least one lowercase letter
-                    </li>
-                    <li style={{ color: passwordRules.upper ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.upper ? "✔" : "✖"} At least one uppercase letter
-                    </li>
-                    <li style={{ color: passwordRules.number ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.number ? "✔" : "✖"} At least one number
-                    </li>
-                    <li style={{ color: passwordRules.symbol ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.symbol ? "✔" : "✖"} At least one special character (# @ % $ ! & *)
-                    </li>
-                    <li style={{ color: passwordRules.length ? "green" : "red", listStyle: 'none' }}>
-                        {passwordRules.length ? "✔" : "✖"} Minimum 8 characters
-                    </li>
-                </ul>
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: "space-between", mt: 1 }}>

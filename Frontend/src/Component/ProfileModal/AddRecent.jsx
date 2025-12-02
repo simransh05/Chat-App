@@ -12,6 +12,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import api from "../../utils/Api";
 import { fetchRecentChats } from "../../Slices/recentSlice";
+const base_url = import.meta.env.VITE_BASE_URL;
 
 function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     const [email, setEmail] = useState("");
@@ -19,6 +20,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     const [notFound, setNotFound] = useState(false);
 
     const users = useSelector((state) => state.user.users);
+    const contacts = useSelector((state) => state.contact.contact);
     const dispatch = useDispatch();
 
     const handleSearch = () => {
@@ -34,16 +36,25 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     };
 
     const handleStartChat = () => {
+        const exist = contacts.find(u => u.email === email);
+
+        const user = users.find(u => u.email === email);
         setSelectedUser({
-            id: searchedUser._id,
-            name: searchedUser.name,
+            id: user?._id || exist?._id || user?.id ||exist?.id || '',
             email: searchedUser.email,
-            existsInUserDB: true
+            existsInUserDB: user,
+            name: exist?.name || user?.name|| "",
+            inviteSent: false
         });
 
         dispatch(fetchRecentChats());
-        onClose();
+        handleClose();
     };
+    const handleClose = () => {
+        setEmail('');
+        setSearchedUser(null);
+        onClose();
+    }
 
     const handleInvite = async () => {
         try {
@@ -54,16 +65,8 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
 
             await api.postInvite(sendData);
 
-            setSelectedUser({
-                id: "",
-                name: email,
-                email,
-                existsInUserDB: false,
-                inviteSent: true
-            });
-
             dispatch(fetchRecentChats());
-            onClose();
+            handleClose();
 
         } catch (err) {
             console.error(err);
@@ -71,11 +74,11 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth
+        <Dialog open={open} onClose={handleClose} fullWidth
             maxWidth="xs"
             PaperProps={{
                 sx: {
-                    width: "450px",  
+                    width: "450px",
                     borderRadius: "10px",
                     paddingBottom: "10px"
                 }
@@ -90,13 +93,32 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                     margin="normal"
                     required
                 />
-
                 {searchedUser && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "15px" }}>
-                        <Avatar>{searchedUser.name[0]}</Avatar>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "15px" }}>
+
+                        <Avatar>
+                            {users.find(u => u.email === email).ProfilePic
+                                ? (
+                                    <img
+                                        src={`${base_url}${users.find(u => u.email === email).ProfilePic}`}
+                                        alt="profile"
+                                        style={{ width: "100%", height: "100%" }}
+                                    />
+                                ) : (
+                                    email[0]?.toUpperCase()
+                                )
+                            }
+                        </Avatar>
+
                         <div>
-                            <Typography>{searchedUser.name}</Typography>
-                            <Typography variant="body2" color="gray">{searchedUser.email}</Typography>
+                            {contacts.some(c => c.email === email) ? (
+                                <>
+                                    <Typography>{searchedUser.name}</Typography>
+                                    <Typography variant="body2" color="gray">{searchedUser.email}</Typography>
+                                </>
+                            ) : (
+                                <Typography variant="body2" color="gray">{searchedUser.email}</Typography>
+                            )}
                         </div>
 
                         <Button
@@ -110,7 +132,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                 )}
 
                 {notFound && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "15px", width:'190px'}}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "15px", width: '190px' }}>
                         <Avatar>{email[0]?.toUpperCase()}</Avatar>
                         <div>
                             <Typography>{email}</Typography>
@@ -131,10 +153,10 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button variant="contained" onClick={handleSearch} sx={{marginRight:'8px'}}>Search</Button>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button variant="contained" onClick={handleSearch} sx={{ marginRight: '8px' }}>Search</Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 }
 

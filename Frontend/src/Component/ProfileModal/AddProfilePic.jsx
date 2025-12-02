@@ -81,6 +81,7 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
                         style={{
+                            margin: "auto",
                             border: "1px solid #ccc",
                             padding: "5px 8px",
                             borderRadius: "5px",
@@ -92,13 +93,13 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
                 ) : (
                     <Typography
                         onClick={() => setEditName(true)}
-                        sx={{ cursor: "pointer", fontWeight: "bold", mt: 1 }}
+                        sx={{ cursor: "pointer", fontWeight: "bold", mt: 1 ,marginBottom:'6px'}}
                     >
                         {newName}
                     </Typography>
                 )}
 
-                <Typography>
+                <Typography sx={{marginBottom:'8px'}}>
                     {currentUser.email}
                 </Typography>
 
