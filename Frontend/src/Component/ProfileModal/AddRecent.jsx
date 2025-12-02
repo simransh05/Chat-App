@@ -53,6 +53,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     const handleClose = () => {
         setEmail('');
         setSearchedUser(null);
+        setNotFound(false)
         onClose();
     }
 
@@ -94,7 +95,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                     required
                 />
                 {searchedUser && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "15px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth:'400px'}}>
 
                         <Avatar>
                             {users.find(u => u.email === email).ProfilePic
@@ -123,7 +124,6 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
 
                         <Button
                             variant="contained"
-                            sx={{ marginLeft: "auto" }}
                             onClick={handleStartChat}
                         >
                             Start Chat
@@ -132,7 +132,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                 )}
 
                 {notFound && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "15px", width: '190px' }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth:'400px' }}>
                         <Avatar>{email[0]?.toUpperCase()}</Avatar>
                         <div>
                             <Typography>{email}</Typography>
@@ -142,7 +142,6 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                         <Button
                             variant="contained"
                             color="warning"
-                            sx={{ marginLeft: "auto" }}
                             onClick={handleInvite}
                         >
                             Send Invite
