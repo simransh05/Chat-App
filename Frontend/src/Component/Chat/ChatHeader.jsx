@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import api from "../../utils/Api";
@@ -16,16 +16,14 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
     const dispatch = useDispatch()
 
     const users = useSelector((state) => state.user.users);
-    const userFromDB = users.find(u => u.email === selectedUser.email);
-    const profilePic = userFromDB?.ProfilePic;
 
     const contacts = useSelector((state) => state.contact.contact);
-    const userContact = contacts.find((u) => u.email === selectedUser.email)||null
+    const userContact = contacts.find((u) => u.email === selectedUser.email) || null
 
     const fullUser = selectedUser
         ? users.find((u) => u.email === selectedUser.email)
         : null;
-
+    const profilePic = fullUser?.ProfilePic || userContact?.ProfilePic;
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -84,7 +82,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                         />
                     ) : (
                         <div className="header-avatar-initial">
-                            {getInitials(fullUser.name)}
+                            {getInitials(userContact ? userContact.name : selectedUser.name)}
                         </div>
                     )}
                     <div className="name">{userContact ? userContact.name : selectedUser.name}</div>
