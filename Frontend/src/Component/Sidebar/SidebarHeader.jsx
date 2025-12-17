@@ -47,14 +47,14 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
     return (
         <div className="heading">
             <button className="profile-avatar" onClick={() => setShowModal(true)}>
-                {currentUser.ProfilePic ? (
+                {currentUser?.ProfilePic ? (
                     <img
                         src={`${base_url}${currentUser.ProfilePic}`}
                         alt="profile"
                         className="avatar-img"
                     />
                 ) : (
-                    getInitials(currentUser.name)
+                    getInitials(currentUser?.name)
                 )}
             </button>
 
@@ -68,7 +68,7 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
                 />
             )}
 
-            <div className='username'>{currentUser.name}</div>
+            <div className='username'>{currentUser?.name}</div>
 
             <IconButton onClick={handleMenuClick} sx={{
                 display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
