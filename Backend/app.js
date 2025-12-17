@@ -22,6 +22,7 @@ app.use(express.json());
 app.use("/", authRoutes);
 
 const server = http.createServer(app);
+const PORT = process.env.PORT || 4000;
 const io = new Server(server, {
   cors: {
     origin: process.env.BASE_URL,
@@ -76,8 +77,8 @@ io.on("connection", (socket) => {
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
-    server.listen(4000, () => {
-      console.log("Server running on port 4000");
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => console.error("MongoDB connection error:", err));
