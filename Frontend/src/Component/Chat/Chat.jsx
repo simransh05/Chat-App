@@ -42,16 +42,16 @@ function Chat() {
       if (decoded.exp < currentTime) {
         localStorage.removeItem("login-info");
         navigate("/login");
+        return;
       }
     } else {
       navigate("/login");
+      return;
     }
-  }, [navigate]);
-
-  useEffect(() => {
     dispatch(fetchContacts());
     dispatch(fetchRecentChats());
-  }, [currentUser.name]);
+  }, [navigate, currentUser?.name]);
+
 
   const normalizeMsg = (msg) => {
     if (!msg) return null;
@@ -72,10 +72,12 @@ function Chat() {
   };
 
   useEffect(() => {
-    if (currentUser.name) {
+    if (currentUser?.id) {
       socket.emit("register", currentUser.id);
+    } else {
+      return;
     }
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   const handleInvite = async (email) => {
     try {
