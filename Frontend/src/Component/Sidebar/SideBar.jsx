@@ -27,29 +27,33 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshUsers = [...users];
 
             const userExists = freshUsers.find(u => u._id === id || u.id === id);
-            // console.log("1", userExists)
+            console.log("1", userExists)
 
             const contactEntry = freshContacts.find(c => c.id === id);
             const name = contactEntry?.name || userExists?.name || "";
             const email = contactEntry?.email || userExists?.email || "";
-            // console.log("2", freshUsers)
+            console.log()
+            console.log("2", contactEntry)
             const nextSelected = {
-                id: userExists?._id || contactEntry?._id || userExists?.id || contactEntry?.id || '',
+                id: userExists?._id  || userExists?.id ||  '',
                 name,
                 email,
-                existsInUserDB: userExists,
+                existsInUserDB: !!userExists,
                 inviteSent: contactEntry?.inviteSent === true
             };
             setSelectedUser(nextSelected);
-            dispatch(fetchContacts());
-            dispatch(fetchRecentChats())
             console.log('fetch')
 
             if (nextSelected?.id) {
-                const res = await api.getHistory(currentUser.id, nextSelected?.id);
+                const res = await api.getHistory(currentUser._id, nextSelected?.id);
                 const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
                 setMessages(newMessages);
+            }else {
+                return;
             }
+            // for updating the user profile pic if there is present
+            dispatch(fetchContacts(currentUser?._id));
+            dispatch(fetchRecentChats(currentUser?._id))
         }
         catch (err) {
             console.error("Error loading chat:", err);
@@ -93,7 +97,6 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             <div className="sidebar-header">
 
                 <SidebarHeader
-                    currentUser={currentUser}
                     getInitials={getInitials}
                     setCurrentUser={setCurrentUser}
                 />
@@ -136,7 +139,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             <AddContactButton
                 selectedBtn={selectedBtn}
                 currentUser={currentUser}
-                setSelectedUser={setSelectedUser}
+                handleUserClick={handleUserClick}
             />
         </div>
     )

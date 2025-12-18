@@ -49,14 +49,30 @@ async function login(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: { id: user._id, name: user.name, email: user.email, ProfilePic: user.ProfilePic },
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000
     });
+
+    res.status(200).json({ message: "Login successful", });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+async function getCurrentUser(req, res) {
+  try {
+    const token = req.cookies.token;
+    if(!token){
+      return res.status(404).json({message:'not login'})
+    }
+    const data = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(data.id);
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ message: 'error' })
   }
 }
 
@@ -201,7 +217,7 @@ async function getChat(req, res) {
     const users = await User.find({ _id: { $in: ids } })
       .select("email ProfilePic");
 
-      // console.log(users)
+    // console.log(users)
     const result = users.map(u => ({
       id: u._id,
       name: contactMap[u._id],
@@ -335,4 +351,17 @@ async function resetPassword(req, res) {
   }
 }
 
-module.exports = { signup, login, getAllUsers, getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat, resetPassword };
+async function logout(req, res) {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: false,
+    });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message })
+  }
+}
+
+module.exports = { signup, login, getCurrentUser, getAllUsers, logout , getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat, resetPassword };

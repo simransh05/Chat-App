@@ -59,7 +59,7 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
         }
 
         try {
-            const payload = { userId: currentUser.id, oldPass, newPass };
+            const payload = { userId: currentUser?._id, oldPass, newPass };
             await api.resetPassword(payload);
 
             Swal.fire("Success", "Password updated successfully!", "success");

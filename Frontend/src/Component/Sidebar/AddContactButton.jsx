@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useDispatch } from 'react-redux';
 import { fetchContacts } from '../../Slices/contactSlice';
 import AddRecent from '../ProfileModal/AddRecent';
-function AddContactButton({ currentUser, selectedBtn, setSelectedUser }) {
+function AddContactButton({ currentUser, selectedBtn, handleUserClick }) {
     const dispatch = useDispatch();
     const [showAddContact, setShowAddContact] = useState(false);
     const [showRecent, setShowRecent] = useState(false)
@@ -28,7 +28,7 @@ function AddContactButton({ currentUser, selectedBtn, setSelectedUser }) {
                     <AddContact
                         open={showAddContact}
                         onClose={() => setShowAddContact(false)}
-                        onSuccess={() => dispatch(fetchContacts(currentUser))}
+                        onSuccess={() => dispatch(fetchContacts(currentUser?._id))}
                     />
                 </>
             ) : (
@@ -47,7 +47,7 @@ function AddContactButton({ currentUser, selectedBtn, setSelectedUser }) {
                     <AddRecent
                         open={showRecent}
                         onClose={() => setShowRecent(false)}
-                        setSelectedUser={setSelectedUser}
+                        handleUserClick={handleUserClick}
                         currentUser={currentUser}
                     />
                 </>

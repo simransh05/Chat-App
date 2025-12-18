@@ -3,9 +3,7 @@ import api from "../utils/Api";
 
 export const fetchRecentChats = createAsyncThunk(
     "recent/fetchRecentChats",
-    async () => {
-        const userData = JSON.parse(localStorage.getItem("login-info"));
-        const id = userData?.user?.id;
+    async (id) => {
         const res = await api.recent(id)
         console.log('using backend')
         return res.data;

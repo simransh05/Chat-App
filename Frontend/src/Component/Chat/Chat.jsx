@@ -13,44 +13,42 @@ import SideBar from "../Sidebar/SideBar";
 import ChatHeader from "./ChatHeader";
 import ChatBody from "./ChatBody";
 import ChatFooter from "./ChatFooter";
+import { fetchCurrentUser } from "../../Slices/currentUserSlice";
 
 function Chat() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("login-info"))?.user
-  );
+
+  useEffect(() => {
+    dispatch(fetchCurrentUser())
+      .unwrap()
+      .catch(() => {
+        navigate("/login");
+      });
+  }, [dispatch, navigate]);
+
+
+  const currentData = useSelector((state) => state.currentUser.users);
+  const [currentUser, setCurrentUser] = useState(currentData);
+
 
   const contacts = useSelector((state) => state.contact.contact)
+  const users = useSelector(state => state.user.users)
 
-  const [selectedUser, setSelectedUser] = useState({
-    id: "",
-    name: '',
-    email: '',
-    existsInUserDB: false,
-    inviteSent: false
-  });
+  const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [FontSize, setFontSize] = useState("normal");
 
   useEffect(() => {
-    const token = localStorage.getItem("login-info");
-    if (token) {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      if (decoded.exp < currentTime) {
-        localStorage.removeItem("login-info");
-        navigate("/login");
-        return;
-      }
+    console.log(currentUser)
+    if (currentUser) {
+      dispatch(fetchContacts(currentUser?._id));
+      dispatch(fetchRecentChats(currentUser?._id));
     } else {
-      navigate("/login");
-      return;
+      navigate('/login')
     }
-    dispatch(fetchContacts());
-    dispatch(fetchRecentChats());
-  }, [navigate, currentUser?.name]);
+  }, [navigate, currentUser]);
 
 
   const normalizeMsg = (msg) => {
@@ -72,21 +70,20 @@ function Chat() {
   };
 
   useEffect(() => {
-    if (currentUser?.id) {
-      socket.emit("register", currentUser.id);
+    if (currentUser?._id) {
+      socket.emit("register", currentUser._id);
     } else {
       return;
     }
-  }, [currentUser?.id]);
+  }, [currentUser?._id]);
 
   const handleInvite = async (email) => {
     try {
-      const userData = JSON.parse(localStorage.getItem("login-info"));
-      const id = userData?.user?.id;
+      const id = currentUser._id
       const sendData = { senderId: id, email }
 
       const res = await api.postInvite(sendData);
-      dispatch(fetchContacts())
+      dispatch(fetchContacts(currentUser?._id))
       setSelectedUser(prev => ({ ...prev, inviteSent: true }));
 
     } catch (err) {
@@ -99,7 +96,7 @@ function Chat() {
       const newData = normalizeMsg(data);
 
       setMessages(prev => [...prev, newData]);
-      dispatch(fetchRecentChats());
+      dispatch(fetchRecentChats(currentUser?._id));
     });
 
     return () => socket.off("receive_message");
@@ -110,7 +107,7 @@ function Chat() {
     if (!message || !selectedUser?.name) return;
 
     const msgData = {
-      senderId: currentUser.id,
+      senderId: currentUser._id,
       receiverId: selectedUser.id,
       message,
     };
@@ -123,12 +120,12 @@ function Chat() {
             sender: currentUser.name,
             receiver: selectedUser.name,
             message,
-            senderId: currentUser.id,
+            senderId: currentUser._id,
             receiverId: selectedUser.id
           }
         ]);
         setMessage("");
-        dispatch(fetchRecentChats())
+        dispatch(fetchRecentChats(currentUser._id))
       } else {
         console.log(res.message);
       }
@@ -165,7 +162,7 @@ function Chat() {
         normalizeMsg={normalizeMsg} />
 
       <div className="chat-area">
-        {selectedUser?.id ? (
+        {selectedUser ? (
           selectedUser.existsInUserDB ? (
             <>
               <ChatHeader
@@ -181,7 +178,7 @@ function Chat() {
                 messages={messages}
                 selectedUser={selectedUser}
                 FontSize={FontSize}
-                currentUser={currentUser.id} />
+                currentUser={currentUser._id} />
 
               <ChatFooter
                 handleSend={handleSend}

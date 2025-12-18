@@ -7,10 +7,12 @@ import {
 } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ResetPasswordModal from '../ProfileModal/ResetPasswordModal';
+import api from '../../utils/Api';
+import { useSelector } from 'react-redux';
 
 const base_url = import.meta.env.VITE_BASE_URL;
 
-function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
+function SidebarHeader({ getInitials }) {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -18,9 +20,10 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
     const [openPassModal, setOpenPassModal] = useState(false);
     const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
+    const currentUser = useSelector(state => state.currentUser.users);
 
-    const logout = () => {
-        Swal.fire({
+    const logout = async () => {
+        const result = await Swal.fire({
             title: "Logout?",
             text: "Are you sure you want to logout?",
             icon: "warning",
@@ -28,21 +31,18 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
             confirmButtonText: "Yes",
             cancelButtonText: "No",
             reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.clear();
-                navigate('/');
-            }
         });
+
+        if (result.isConfirmed) {
+            try {
+                await api.logout(); 
+                navigate('/');
+            } catch (err) {
+                console.error("Logout failed:", err);
+            }
+        }
     };
 
-    const upload = (newPic) => {
-        const info = JSON.parse(localStorage.getItem("login-info"));
-        info.user.ProfilePic = newPic;
-        localStorage.setItem("login-info", JSON.stringify(info));
-
-        currentUser.ProfilePic = newPic;
-    };
 
     return (
         <div className="heading">
@@ -62,9 +62,7 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
                 <AddProfilePic
                     open={showModal}
                     currentUser={currentUser}
-                    setCurrentUser={setCurrentUser}
                     close={() => setShowModal(false)}
-                    onUpload={(pic) => upload(pic)}
                 />
             )}
 
@@ -72,7 +70,7 @@ function SidebarHeader({ currentUser, getInitials, setCurrentUser }) {
 
             <IconButton onClick={handleMenuClick} sx={{
                 display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
-                minWidth: 'auto', maxWidth:'30px'
+                minWidth: 'auto', maxWidth: '30px'
             }}>
                 <MoreVertIcon />
             </IconButton>

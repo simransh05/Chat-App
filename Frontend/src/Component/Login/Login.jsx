@@ -13,8 +13,12 @@ import {
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCurrentUser } from "../../Slices/currentUserSlice";
 
 function Login() {
+  const dispatch = useDispatch()
+  const alreadyUser = useSelector((state) => state.currentUser.users);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -40,26 +44,17 @@ function Login() {
     }
   }
 
+
   useEffect(() => {
-    const alreadyUser = localStorage.getItem("login-info");
+    dispatch(fetchCurrentUser());
     if (alreadyUser) navigate("/chat");
-  }, []);
+  }, [alreadyUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await api.createUserInfo(formData);
-      const data = res.data;
-
-      localStorage.setItem(
-        "login-info",
-        JSON.stringify({
-          token: data.token,
-          user: data.user,
-        })
-      );
-
+      await api.createUserInfo(formData);
       navigate("/chat");
     } catch (err) {
       if (err.response?.status == "404") {

@@ -7,7 +7,7 @@ const { Server } = require("socket.io");
 const User = require('./model/User')
 const authRoutes = require("./Route/auth");
 const Message = require("./model/Message");
-
+const cookies = require('cookie-parser')
 dotenv.config();
 const app = express();
 app.use("/uploads", express.static("uploads")); // make folder(uploads) public 
@@ -17,6 +17,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+app.use(cookies())
 app.use(express.json());
 
 app.use("/", authRoutes);
