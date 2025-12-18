@@ -8,11 +8,12 @@ import {
   Button,
 } from "@mui/material";
 import api from "../../utils/Api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchRecentChats } from "../../Slices/recentSlice";
 
 
 function AddContact({ open, onClose, onSuccess }) {
+  const login = useSelector((state)=>state.currentUser.users);
   const [data, setData] = useState({ name: "", email: "" });
   const dispatch = useDispatch()
 
@@ -25,11 +26,10 @@ function AddContact({ open, onClose, onSuccess }) {
 
     e.preventDefault();
     try {
-      const login = JSON.parse(localStorage.getItem("login-info"));
-      const id = login.user.id;
+      const id = login._id;
       const allData = { ...data, id };
       await api.postContact(allData);
-      dispatch(fetchRecentChats())
+      dispatch(fetchRecentChats(login?._id))
       if (onSuccess) onSuccess(allData);
       onClose();
     } catch (error) {

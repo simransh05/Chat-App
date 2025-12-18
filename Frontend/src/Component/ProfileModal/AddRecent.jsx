@@ -14,7 +14,7 @@ import api from "../../utils/Api";
 import { fetchRecentChats } from "../../Slices/recentSlice";
 const base_url = import.meta.env.VITE_BASE_URL;
 
-function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
+function AddRecent({ open, onClose, handleUserClick, currentUser }) {
     const [email, setEmail] = useState("");
     const [searchedUser, setSearchedUser] = useState(null);
     const [notFound, setNotFound] = useState(false);
@@ -36,18 +36,8 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     };
 
     const handleStartChat = () => {
-        const exist = contacts.find(u => u.email === email);
-
-        const user = users.find(u => u.email === email);
-        setSelectedUser({
-            id: user?._id || exist?._id || user?.id ||exist?.id || '',
-            email: searchedUser.email,
-            existsInUserDB: user,
-            name: exist?.name || user?.name|| "",
-            inviteSent: false
-        });
-
-        dispatch(fetchRecentChats());
+        const id = searchedUser._id;
+        handleUserClick(id);
         handleClose();
     };
     const handleClose = () => {
@@ -60,13 +50,13 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
     const handleInvite = async () => {
         try {
             const sendData = {
-                senderId: currentUser.id,
+                senderId: currentUser?._id,
                 email
             };
 
             await api.postInvite(sendData);
 
-            dispatch(fetchRecentChats());
+            dispatch(fetchRecentChats(currentUser?._id));
             handleClose();
 
         } catch (err) {
@@ -90,12 +80,16 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                     fullWidth
                     label="Enter Email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                        setEmail(e.target.value);
+                        setSearchedUser(null);
+                        setNotFound(false);
+                    }}
                     margin="normal"
                     required
                 />
                 {searchedUser && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth:'400px'}}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth: '400px' }}>
 
                         <Avatar>
                             {users.find(u => u.email === email).ProfilePic
@@ -132,7 +126,7 @@ function AddRecent({ open, onClose, setSelectedUser, currentUser }) {
                 )}
 
                 {notFound && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth:'400px' }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", margin: "15px", maxWidth: '400px' }}>
                         <Avatar>{email[0]?.toUpperCase()}</Avatar>
                         <div>
                             <Typography>{email}</Typography>

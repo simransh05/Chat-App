@@ -9,6 +9,8 @@ router.post("/signup", controller.signup);
 
 router.post("/login", controller.login);
 
+router.get('/currentUser' , controller.getCurrentUser)
+
 router.get("/users", controller.getAllUsers);
 
 router.get("/history", controller.getHistory);
@@ -18,6 +20,8 @@ router.post('/contact',controller.postContact);
 router.get('/contact/:id',controller.getContact);
 
 router.get("/recent/:id", controller.getChat);
+
+router.post('/logout',controller.logout)
 
 router.post("/invite", controller.postInvite);
 

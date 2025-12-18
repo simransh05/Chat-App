@@ -8,13 +8,19 @@ import {
     Stack
 } from "@mui/material";
 import api from "../../utils/Api";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCurrentUser } from "../../Slices/currentUserSlice";
+import { fetchRecentChats } from "../../Slices/recentSlice";
+import { fetchContacts } from "../../Slices/contactSlice";
+import { fetchUsers } from "../../Slices/userSlice";
 const base_url = import.meta.env.VITE_BASE_URL;
 
-function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
+function AddProfilePic({ open, currentUser, close }) {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(`${base_url}${currentUser.ProfilePic}` || null);
     const [editName, setEditName] = useState(false);
     const [newName, setNewName] = useState(currentUser.name);
+    const dispatch = useDispatch()
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
@@ -23,34 +29,28 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
     };
 
     const handleUpdate = async () => {
-        const info = JSON.parse(localStorage.getItem("login-info"));
-        let updatedUser = { ...currentUser };
         try {
-            if (newName.trim() !== "" && newName !== currentUser.name) {
-                const res = await api.updateName({
-                    userId: info.user.id,
-                    name: newName
+            if (newName.trim() && newName !== currentUser.name) {
+                await api.updateName({
+                    userId: currentUser._id,
+                    name: newName,
                 });
-                updatedUser.name = newName;
-                info.user.name = newName;
             }
+
             if (file) {
                 const form = new FormData();
                 form.append("ProfilePic", file);
-                form.append("userId", info.user.id);
+                form.append("userId", currentUser._id);
 
-                const res = await api.uploadProfile(form);
-                updatedUser.ProfilePic = res.data.ProfilePic;
-                info.user.ProfilePic = res.data.ProfilePic;
-                setPreview(res.data.ProfilePic);
-                onUpload(res.data.ProfilePic);
+                await api.uploadProfile(form);
             }
-            localStorage.setItem("login-info", JSON.stringify(info));
-            setCurrentUser(updatedUser);
-            close();
 
+            dispatch(fetchCurrentUser());
+            dispatch(fetchUsers(currentUser))
+
+            close();
         } catch (err) {
-            console.log(err);
+            console.error(err);
             alert("Could not update profile info");
         }
     };
@@ -93,13 +93,13 @@ function AddProfilePic({ open, currentUser, close, onUpload, setCurrentUser }) {
                 ) : (
                     <Typography
                         onClick={() => setEditName(true)}
-                        sx={{ cursor: "pointer", fontWeight: "bold", mt: 1 ,marginBottom:'6px'}}
+                        sx={{ cursor: "pointer", fontWeight: "bold", mt: 1, marginBottom: '6px' }}
                     >
                         {newName}
                     </Typography>
                 )}
 
-                <Typography sx={{marginBottom:'8px'}}>
+                <Typography sx={{ marginBottom: '8px' }}>
                     {currentUser.email}
                 </Typography>
 

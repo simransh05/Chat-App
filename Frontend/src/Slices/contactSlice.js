@@ -3,9 +3,7 @@ import api from "../utils/Api";
 
 export const fetchContacts = createAsyncThunk(
     "contacts/fetchContacts",
-    async () => {
-        const userData = JSON.parse(localStorage.getItem("login-info"));
-        const id = userData?.user?.id;
+    async (id) => {
         const res = await api.contract(id)
         console.log('using backend',res.data)
         return res.data;

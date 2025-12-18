@@ -49,7 +49,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
         if (!confirm.isConfirmed) return;
 
         try {
-            const res = await api.deleteChat(currentUser.id, selectedUser.id);
+            const res = await api.deleteChat(currentUser?._id, selectedUser.id);
 
             Swal.fire({
                 icon: "success",
@@ -57,7 +57,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 timer: 1200,
                 showConfirmButton: false,
             });
-            dispatch(fetchRecentChats());
+            dispatch(fetchRecentChats(currentUser?._id));
             setMessages([]);
             setSelectedUser(null);
 
@@ -91,7 +91,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
 
             <IconButton onClick={handleMenuOpen}
                 size="small" sx={{
-                    display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,       // remove extra padding
+                    display: "flex", justifyContent: 'right', alignItems: "flex-end", padding: 0,     
                     minWidth: 'auto', maxWidth: '30px'
                 }}>
                 <MoreVertIcon />
