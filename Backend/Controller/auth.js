@@ -17,8 +17,7 @@ async function signup(req, res) {
     const newUser = new User({
       name,
       email,
-      password: hashedPassword,
-      ProfilePic: ''
+      password: hashedPassword
     });
 
     await newUser.save();
@@ -61,16 +60,26 @@ async function login(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
-
+function formatUser(user) {
+  if (!user) return null;
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    ProfilePic: user.ProfilePic
+      ? `data:${user.ProfilePicType};base64,${user.ProfilePic.toString("base64")}`
+      : null
+  };
+}
 async function getCurrentUser(req, res) {
   try {
     const token = req.cookies.token;
-    if(!token){
-      return res.status(404).json({message:'not login'})
+    if (!token) {
+      return res.status(404).json({ message: 'not login' })
     }
     const data = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(data.id);
-    return res.json(user);
+    return res.json(formatUser(user));
   } catch (err) {
     return res.status(500).json({ message: 'error' })
   }
@@ -81,7 +90,7 @@ async function getAllUsers(req, res) {
     const { name } = req.query;
     const users = await User.find({ name: { $ne: name } });
     // console.log(users);
-    res.json(users);
+    res.json(users.map((u => formatUser(u) )));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -174,7 +183,9 @@ async function getContact(req, res) {
       id: c.contactId?._id || c._id,
       name: c.name,
       email: c.contactId?.email || c.email,
-      ProfilePic: c.contactId?.ProfilePic || null,
+      ProfilePic: c.contactId?.ProfilePic
+        ? `data:${c.contactId.ProfilePicType};base64,${c.contactId.ProfilePic.toString("base64")}`
+        : null,
       inviteSent: c.inviteSent || false
     }));
     // console.log("get", result)
@@ -222,7 +233,9 @@ async function getChat(req, res) {
       id: u._id,
       name: contactMap[u._id],
       email: u.email,
-      ProfilePic: u.ProfilePic || null
+      ProfilePic: u.ProfilePic
+        ? `data:${u.ProfilePicType};base64,${u.ProfilePic.toString("base64")}`
+        : null
     }));
     // console.log(result)
     return res.json(result);
@@ -255,11 +268,9 @@ async function uploadFile(req, res) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const url = `/uploads/${req.file.filename}`;
-
     const updated = await User.findByIdAndUpdate(
       userId,
-      { ProfilePic: url },
+      { ProfilePic: req.file.buffer },
       { new: true }
     );
 
@@ -267,7 +278,9 @@ async function uploadFile(req, res) {
 
     res.json({
       message: "Profile picture updated",
-      ProfilePic: updated.ProfilePic,
+      ProfilePic: updated.ProfilePic
+        ? `data:${updated.ProfilePicType};base64,${updated.ProfilePic.toString("base64")}`
+        : null
     });
 
   } catch (err) {
@@ -364,4 +377,4 @@ async function logout(req, res) {
   }
 }
 
-module.exports = { signup, login, getCurrentUser, getAllUsers, logout , getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat, resetPassword };
+module.exports = { signup, login, getCurrentUser, getAllUsers, logout, getHistory, postContact, getChat, postInvite, getContact, uploadFile, updateName, deleteChat, resetPassword };

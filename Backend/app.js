@@ -10,7 +10,6 @@ const Message = require("./model/Message");
 const cookies = require('cookie-parser')
 dotenv.config();
 const app = express();
-app.use("/uploads", express.static("uploads")); // make folder(uploads) public 
 
 app.use(cors({
   origin: process.env.BASE_URL,

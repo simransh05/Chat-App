@@ -5,9 +5,11 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   ProfilePic: {
-    type: String,
-    default: ''
+    type: Buffer
   },
+  ProfilePicType: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model("User", userSchema);

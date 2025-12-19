@@ -17,7 +17,7 @@ const base_url = import.meta.env.VITE_BASE_URL;
 
 function AddProfilePic({ open, currentUser, close }) {
     const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(`${base_url}${currentUser.ProfilePic}` || null);
+    const [preview, setPreview] = useState(currentUser.ProfilePic || null);
     const [editName, setEditName] = useState(false);
     const [newName, setNewName] = useState(currentUser.name);
     const dispatch = useDispatch()

@@ -49,7 +49,7 @@ function SidebarHeader({ getInitials }) {
             <button className="profile-avatar" onClick={() => setShowModal(true)}>
                 {currentUser?.ProfilePic ? (
                     <img
-                        src={`${base_url}${currentUser.ProfilePic}`}
+                        src={`${currentUser.ProfilePic}`}
                         alt="profile"
                         className="avatar-img"
                     />
