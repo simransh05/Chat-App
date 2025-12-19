@@ -41,7 +41,7 @@ function Chat() {
   const [FontSize, setFontSize] = useState("normal");
 
   useEffect(() => {
-    console.log(currentUser)
+    // console.log(currentUser)
     if (currentUser) {
       dispatch(fetchContacts(currentUser?._id));
       dispatch(fetchRecentChats(currentUser?._id));

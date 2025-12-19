@@ -5,7 +5,7 @@ export const fetchRecentChats = createAsyncThunk(
     "recent/fetchRecentChats",
     async (id) => {
         const res = await api.recent(id)
-        console.log('using backend')
+        // console.log('using backend')
         return res.data;
     }
 );

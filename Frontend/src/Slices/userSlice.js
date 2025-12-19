@@ -3,7 +3,7 @@ import api from "../utils/Api";
 
 export const fetchUsers = createAsyncThunk("user/fetchUsers", async (currentUser) => {
     const res = await api.userFetch(currentUser.name);
-    console.log('using backend')
+    // console.log('using backend')
     return res.data.map((u) => ({ name: u.name, email: u.email ,id:u._id , ProfilePic :u.ProfilePic }));
   }
 );

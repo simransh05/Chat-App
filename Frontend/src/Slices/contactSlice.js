@@ -5,7 +5,7 @@ export const fetchContacts = createAsyncThunk(
     "contacts/fetchContacts",
     async (id) => {
         const res = await api.contract(id)
-        console.log('using backend',res.data)
+        // console.log('using backend',res.data)
         return res.data;
     }
 );
