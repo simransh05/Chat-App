@@ -40,21 +40,26 @@ function ResetPasswordModal({ open, onClose, currentUser }) {
 
     const handleResetPassword = async () => {
         if (!oldPass.trim() || !newPass.trim() || !confirmPass.trim()) {
+            onClose();
             return Swal.fire("Error", "All fields are required", "error");
         }
 
         if (newPass !== confirmPass) {
+            onClose();
             return Swal.fire("Error", "New Password & Confirm Password do not match", "error");
         }
 
         if (!passwordRegex.test(oldPass)) {
+            onClose();
             return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
 
         if (!passwordRegex.test(newPass)) {
+            onClose();
             return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
         if (!passwordRegex.test(confirmPass)) {
+            onClose();  
             return Swal.fire("Error", 'invalid type! must be 8–15 characters and include uppercase, lowercase, number, and special character.', 'error')
         }
 
