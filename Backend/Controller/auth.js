@@ -368,8 +368,8 @@ async function logout(req, res) {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
+      sameSite: "None",
+      secure: true,
     });
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
