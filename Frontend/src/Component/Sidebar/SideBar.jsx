@@ -27,13 +27,13 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshUsers = [...users];
 
             const userExists = freshUsers.find(u => u._id === id || u.id === id);
-            console.log("1", userExists)
+            // console.log("1", userExists)
 
             const contactEntry = freshContacts.find(c => c.id === id);
             const name = contactEntry?.name || userExists?.name || "";
             const email = contactEntry?.email || userExists?.email || "";
-            console.log()
-            console.log("2", contactEntry)
+            // console.log()
+            // console.log("2", contactEntry)
             const nextSelected = {
                 id: userExists?._id  || userExists?.id ||  '',
                 name,
@@ -42,7 +42,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                 inviteSent: contactEntry?.inviteSent === true
             };
             setSelectedUser(nextSelected);
-            console.log('fetch')
+            // console.log('fetch')
 
             if (nextSelected?.id) {
                 const res = await api.getHistory(currentUser._id, nextSelected?.id);
