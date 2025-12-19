@@ -76,7 +76,7 @@ function ChatHeader({ selectedUser, setFontSize, getInitials, currentUser, setMe
                 <>
                     {profilePic ? (
                         <img
-                            src={`${base_url}${profilePic}`}
+                            src={`${profilePic}`}
                             alt="profile"
                             className="header-avatar"
                         />

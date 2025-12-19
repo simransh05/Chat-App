@@ -27,7 +27,7 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
             const freshUsers = [...users];
 
             const userExists = freshUsers.find(u => u._id === id || u.id === id);
-            // console.log("1", userExists)
+            // console.log("1", fetchUsers)
 
             const contactEntry = freshContacts.find(c => c.id === id);
             const name = contactEntry?.name || userExists?.name || "";
@@ -48,8 +48,6 @@ function Sidebar({ currentUser, setSelectedUser, selectedUser, setMessages, getI
                 const res = await api.getHistory(currentUser._id, nextSelected?.id);
                 const newMessages = Array.isArray(res.data) ? res.data.map(normalizeMsg) : [];
                 setMessages(newMessages);
-            }else {
-                return;
             }
             // for updating the user profile pic if there is present
             dispatch(fetchContacts(currentUser?._id));

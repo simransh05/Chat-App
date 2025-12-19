@@ -95,7 +95,7 @@ function AddRecent({ open, onClose, handleUserClick, currentUser }) {
                             {users.find(u => u.email === email).ProfilePic
                                 ? (
                                     <img
-                                        src={`${base_url}${users.find(u => u.email === email).ProfilePic}`}
+                                        src={`${users.find(u => u.email === email).ProfilePic}`}
                                         alt="profile"
                                         style={{ width: "100%", height: "100%" }}
                                     />

@@ -32,7 +32,7 @@ function UserList({
                             >
                                 <div className="profile">
                                     {profilePic ? (
-                                        <img src={`${base_url}${profilePic}`} alt={displayName} className="profile-pic" />
+                                        <img src={`${profilePic}`} alt={displayName} className="profile-pic" />
                                     ) : (
                                         <div className="initials">{getInitials(displayName)}</div>
                                     )}
@@ -70,7 +70,7 @@ function UserList({
                                     {users.find(u => u.email === c.email) ? (
                                         c.ProfilePic ? (
                                             <img
-                                                src={`${base_url}${c.ProfilePic}`}
+                                                src={`${c.ProfilePic}`}
                                                 alt={c.name}
                                                 className="profile-pic"
                                             />
