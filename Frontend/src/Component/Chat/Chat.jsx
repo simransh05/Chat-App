@@ -5,7 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 const base_url = import.meta.env.VITE_BASE_URL;
 import { jwtDecode } from "jwt-decode";
-const socket = io(base_url);
+const socket = io(import.meta.env.VITE_BASE_URL, {
+  withCredentials: true,       
+  transports: ["websocket"],   
+});
 import { fetchContacts } from "../../Slices/contactSlice";
 import { fetchRecentChats } from "../../Slices/recentSlice";
 import api from "../../utils/Api";
