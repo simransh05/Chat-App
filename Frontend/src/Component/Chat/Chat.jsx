@@ -3,11 +3,12 @@ import "./Chat.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-const base_url = import.meta.env.VITE_BASE_URL;
-import { jwtDecode } from "jwt-decode";
 const socket = io(import.meta.env.VITE_BASE_URL, {
-  withCredentials: true,       
-  transports: ["websocket"],   
+  withCredentials: true,
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 2000,
 });
 import { fetchContacts } from "../../Slices/contactSlice";
 import { fetchRecentChats } from "../../Slices/recentSlice";
